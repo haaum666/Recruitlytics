@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { questions } from '../../config/questions.js';
+import React, { useState, useEffect } from 'react';
+import { questions as defaultQuestions } from '../../config/questions.js';
 import { Button } from '../ui/button';
 import {
   Dialog,
@@ -11,10 +11,22 @@ import {
 } from '../ui/dialog';
 import { Label } from '../ui/label';
 import { Input } from '../ui/input';
+import { getFromLocalStorage, saveToLocalStorage } from '../../services/localStorageService.js';
 
 function QuestionsEditor() {
   const [open, setOpen] = useState(false);
-  const [newQuestion, setNewQuestion] = useState({ text: '', weight: 1 });
+  const [newQuestion, setNewQuestion] = useState({ text: '', weight: 1, type: 'boolean' });
+  const [currentQuestions, setCurrentQuestions] = useState([]);
+
+  useEffect(() => {
+    // Загружаем вопросы из localStorage при загрузке компонента
+    const savedQuestions = getFromLocalStorage('customQuestions', []);
+    if (savedQuestions.length > 0) {
+      setCurrentQuestions([...defaultQuestions, ...savedQuestions]);
+    } else {
+      setCurrentQuestions(defaultQuestions);
+    }
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -25,10 +37,16 @@ function QuestionsEditor() {
   };
 
   const handleAddQuestion = () => {
-    // Временно просто выводим данные в консоль
-    // Потом здесь будет логика сохранения
-    console.log(newQuestion);
-    setOpen(false); // Закрываем модальное окно после сохранения
+    const customQuestions = getFromLocalStorage('customQuestions', []);
+    const newId = `custom_${customQuestions.length + 1}`;
+    const questionToAdd = { ...newQuestion, id: newId };
+
+    const updatedCustomQuestions = [...customQuestions, questionToAdd];
+    saveToLocalStorage('customQuestions', updatedCustomQuestions);
+    setCurrentQuestions([...defaultQuestions, ...updatedCustomQuestions]);
+    
+    setOpen(false);
+    setNewQuestion({ text: '', weight: 1, type: 'boolean' });
   };
 
   return (
@@ -78,7 +96,7 @@ function QuestionsEditor() {
         </Dialog>
       </div>
       <ul className="space-y-4">
-        {questions.map(q => (
+        {currentQuestions.map(q => (
           <li key={q.id} className="p-3 border rounded-md bg-gray-50 flex justify-between items-center">
             <span>{q.text} (Вес: {q.weight})</span>
             <div className="space-x-2">
