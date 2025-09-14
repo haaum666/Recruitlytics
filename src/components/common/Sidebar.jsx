@@ -3,8 +3,8 @@ import { Button } from '../ui/button';
 
 function Sidebar({ onPageChange }) {
   return (
-    <aside className="w-64 bg-white border-r">
-      <div className="py-4 px-4 mb-4">
+    <aside className="w-64 bg-white border-r flex flex-col">
+      <div className="flex items-center py-4 px-4 mb-4">
         <h2 className="text-xl font-bold">Recruitlytics</h2>
       </div>
       <nav className="space-y-2 px-4">
