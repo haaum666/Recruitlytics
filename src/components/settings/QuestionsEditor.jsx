@@ -18,14 +18,14 @@ function QuestionsEditor() {
   const [newQuestion, setNewQuestion] = useState({ text: '', weight: 1, type: 'boolean' });
   const [currentQuestions, setCurrentQuestions] = useState([]);
 
-  useEffect(() => {
-    // Загружаем вопросы из localStorage при загрузке компонента
+  const loadQuestions = () => {
     const savedQuestions = getFromLocalStorage('customQuestions', []);
-    if (savedQuestions.length > 0) {
-      setCurrentQuestions([...defaultQuestions, ...savedQuestions]);
-    } else {
-      setCurrentQuestions(defaultQuestions);
-    }
+    const combinedQuestions = [...defaultQuestions, ...savedQuestions];
+    setCurrentQuestions(combinedQuestions);
+  };
+
+  useEffect(() => {
+    loadQuestions();
   }, []);
 
   const handleInputChange = (e) => {
@@ -38,15 +38,27 @@ function QuestionsEditor() {
 
   const handleAddQuestion = () => {
     const customQuestions = getFromLocalStorage('customQuestions', []);
-    const newId = `custom_${customQuestions.length + 1}`;
+    const newId = `custom_${Date.now()}`;
     const questionToAdd = { ...newQuestion, id: newId };
 
     const updatedCustomQuestions = [...customQuestions, questionToAdd];
     saveToLocalStorage('customQuestions', updatedCustomQuestions);
-    setCurrentQuestions([...defaultQuestions, ...updatedCustomQuestions]);
+    loadQuestions(); // Перезагружаем вопросы для обновления интерфейса
     
     setOpen(false);
     setNewQuestion({ text: '', weight: 1, type: 'boolean' });
+  };
+  
+  const handleDeleteQuestion = (id) => {
+    const customQuestions = getFromLocalStorage('customQuestions', []);
+    const updatedCustomQuestions = customQuestions.filter(q => q.id !== id);
+    saveToLocalStorage('customQuestions', updatedCustomQuestions);
+    loadQuestions(); // Перезагружаем вопросы для обновления интерфейса
+  };
+  
+  const handleEditQuestion = (question) => {
+    // Эта функция будет реализована в следующем шаге
+    console.log("Редактирование вопроса:", question);
   };
 
   return (
@@ -100,8 +112,8 @@ function QuestionsEditor() {
           <li key={q.id} className="p-3 border rounded-md bg-gray-50 flex justify-between items-center">
             <span>{q.text} (Вес: {q.weight})</span>
             <div className="space-x-2">
-              <button className="text-blue-600 hover:text-blue-800">Редактировать</button>
-              <button className="text-red-600 hover:text-red-800">Удалить</button>
+              <Button onClick={() => handleEditQuestion(q)} variant="ghost" className="text-blue-600 hover:text-blue-800">Редактировать</Button>
+              <Button onClick={() => handleDeleteQuestion(q.id)} variant="ghost" className="text-red-600 hover:text-red-800">Удалить</Button>
             </div>
           </li>
         ))}
