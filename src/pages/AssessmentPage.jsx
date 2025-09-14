@@ -15,14 +15,12 @@ function AssessmentPage() {
     firstName: '',
     lastName: '',
     age: '',
-    salaryMin: '',
-    salaryMax: '',
+    salaryRange: '',
     location: '',
     phone: '',
     messenger: '',
     role: '',
   });
-  const [openAccordion, setOpenAccordion] = useState(null);
 
   const scoreInputRefs = useRef({});
 
@@ -100,7 +98,6 @@ function AssessmentPage() {
   };
 
   const handleAccordionOpen = (value) => {
-    setOpenAccordion(value);
     if (value && scoreInputRefs.current[value]) {
       scoreInputRefs.current[value].focus();
     }
@@ -143,12 +140,12 @@ function AssessmentPage() {
               <Input id="age" type="number" value={candidateData.age} onChange={handleCandidateChange} />
             </div>
             <div>
-              <Label htmlFor="salaryMin">ЗП, мин</Label>
-              <Input id="salaryMin" type="number" value={candidateData.salaryMin} onChange={handleCandidateChange} />
+              <Label htmlFor="salaryRange">Вилка ЗП</Label>
+              <Input id="salaryRange" value={candidateData.salaryRange} onChange={handleCandidateChange} />
             </div>
             <div>
-              <Label htmlFor="salaryMax">ЗП, макс</Label>
-              <Input id="salaryMax" type="number" value={candidateData.salaryMax} onChange={handleCandidateChange} />
+              <Label htmlFor="messenger">Мессенджер</Label>
+              <Input id="messenger" value={candidateData.messenger} onChange={handleCandidateChange} />
             </div>
             <div>
               <Label htmlFor="location">Локация</Label>
@@ -157,10 +154,6 @@ function AssessmentPage() {
             <div>
               <Label htmlFor="phone">Телефон</Label>
               <Input id="phone" type="tel" value={candidateData.phone} onChange={handleCandidateChange} />
-            </div>
-            <div className="sm:col-span-2">
-              <Label htmlFor="messenger">Мессенджер</Label>
-              <Input id="messenger" value={candidateData.messenger} onChange={handleCandidateChange} />
             </div>
           </div>
         </CardContent>
@@ -172,11 +165,11 @@ function AssessmentPage() {
           <h2 className="text-xl font-semibold">Оценка навыков</h2>
         </CardHeader>
         <CardContent>
-          <Accordion type="single" collapsible className="w-full" onValueChange={handleAccordionOpen} value={openAccordion}>
+          <Accordion type="single" collapsible className="w-full" onValueChange={handleAccordionOpen}>
             {questions.map((question) => {
               const currentScore = assessmentData[question.id]?.score;
               const currentComment = assessmentData[question.id]?.comment;
-              const isItemOpen = openAccordion === question.id;
+              const isItemOpen = question.id === 'open'; // A placeholder value
               
               return (
                 <AccordionItem key={question.id} value={question.id}>
