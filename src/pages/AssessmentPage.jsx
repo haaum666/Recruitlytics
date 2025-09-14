@@ -22,6 +22,7 @@ function AssessmentPage() {
     messenger: '',
     role: '',
   });
+  const [openAccordion, setOpenAccordion] = useState(null);
 
   const scoreInputRefs = useRef({});
 
@@ -99,9 +100,19 @@ function AssessmentPage() {
   };
 
   const handleAccordionOpen = (value) => {
+    setOpenAccordion(value);
     if (value && scoreInputRefs.current[value]) {
       scoreInputRefs.current[value].focus();
     }
+  };
+
+  const formatComment = (comment) => {
+    if (!comment) return '';
+    const trimmedComment = comment.trim();
+    if (trimmedComment.length > 30) {
+      return `${trimmedComment.substring(0, 30)}...`;
+    }
+    return trimmedComment;
   };
 
   return (
@@ -161,54 +172,69 @@ function AssessmentPage() {
           <h2 className="text-xl font-semibold">Оценка навыков</h2>
         </CardHeader>
         <CardContent>
-          <Accordion type="single" collapsible className="w-full" onValueChange={handleAccordionOpen}>
-            {questions.map((question) => (
-              <AccordionItem key={question.id} value={question.id}>
-                <AccordionTrigger>{question.text} ({question.weight} баллов)</AccordionTrigger>
-                <AccordionContent>
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor={`score-${question.id}`}>Балл (0-10)</Label>
-                      <div className="flex items-center space-x-2">
-                        <Button
-                          onClick={() => handleScoreChange(question.id, (assessmentData[question.id]?.score || 0) - 1)}
-                          variant="outline"
-                          size="icon"
-                        >
-                          -
-                        </Button>
-                        <Input
-                          ref={el => scoreInputRefs.current[question.id] = el}
-                          id={`score-${question.id}`}
-                          type="number"
-                          min="0"
-                          max="10"
-                          value={assessmentData[question.id]?.score || ''}
-                          onChange={(e) => handleScoreChange(question.id, e.target.value)}
+          <Accordion type="single" collapsible className="w-full" onValueChange={handleAccordionOpen} value={openAccordion}>
+            {questions.map((question) => {
+              const currentScore = assessmentData[question.id]?.score;
+              const currentComment = assessmentData[question.id]?.comment;
+              const isItemOpen = openAccordion === question.id;
+              
+              return (
+                <AccordionItem key={question.id} value={question.id}>
+                  <AccordionTrigger className="flex justify-between items-center w-full">
+                    <div className="flex-1 text-left">{question.text} ({question.weight} баллов)</div>
+                    {!isItemOpen && (
+                      <div className="ml-4 flex items-center space-x-2 text-sm text-gray-500 flex-shrink-0">
+                        {currentScore > 0 && <span>Балл: {currentScore}</span>}
+                        {currentComment && <span>Комментарий: {formatComment(currentComment)}</span>}
+                      </div>
+                    )}
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor={`score-${question.id}`}>Балл (0-10)</Label>
+                        <div className="flex items-center">
+                          <Button
+                            onClick={() => handleScoreChange(question.id, (assessmentData[question.id]?.score || 0) + 1)}
+                            variant="outline"
+                            className="rounded-r-none"
+                          >
+                            +
+                          </Button>
+                          <Button
+                            onClick={() => handleScoreChange(question.id, (assessmentData[question.id]?.score || 0) - 1)}
+                            variant="outline"
+                            className="rounded-none"
+                          >
+                            -
+                          </Button>
+                          <Input
+                            ref={el => scoreInputRefs.current[question.id] = el}
+                            id={`score-${question.id}`}
+                            type="number"
+                            min="0"
+                            max="10"
+                            value={assessmentData[question.id]?.score || ''}
+                            onChange={(e) => handleScoreChange(question.id, e.target.value)}
+                            className="rounded-l-none"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor={`comment-${question.id}`}>Комментарий</Label>
+                        <Textarea
+                          id={`comment-${question.id}`}
+                          placeholder="Добавьте свои мысли"
+                          value={assessmentData[question.id]?.comment || ''}
+                          onChange={(e) => handleCommentChange(question.id, e.target.value)}
+                          rows="3"
                         />
-                        <Button
-                          onClick={() => handleScoreChange(question.id, (assessmentData[question.id]?.score || 0) + 1)}
-                          variant="outline"
-                          size="icon"
-                        >
-                          +
-                        </Button>
                       </div>
                     </div>
-                    <div>
-                      <Label htmlFor={`comment-${question.id}`}>Комментарий</Label>
-                      <Textarea
-                        id={`comment-${question.id}`}
-                        placeholder="Добавьте свои мысли"
-                        value={assessmentData[question.id]?.comment || ''}
-                        onChange={(e) => handleCommentChange(question.id, e.target.value)}
-                        rows="3"
-                      />
-                    </div>
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            ))}
+                  </AccordionContent>
+                </AccordionItem>
+              );
+            })}
           </Accordion>
         </CardContent>
       </Card>
