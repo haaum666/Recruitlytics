@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getFromLocalStorage } from '../services/localStorageService.js';
+import { getFromLocalStorage, saveToLocalStorage } from '../services/localStorageService.js';
 import { Card, CardContent } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '../components/ui/accordion';
@@ -33,7 +33,7 @@ function HistoryPage() {
     let template = '';
     const scoreText = `Итоговый балл: ${score}`;
     
-    if (score >= 50) { // Используем 50 как пороговое значение для примера
+    if (score >= 50) {
       template = emailTemplates.positive || 'Шаблон положительной оценки не найден.';
     } else {
       template = emailTemplates.negative || 'Шаблон отрицательной оценки не найден.';
@@ -53,6 +53,15 @@ function HistoryPage() {
       .catch(err => {
         console.error('Не удалось скопировать текст: ', err);
       });
+  };
+
+  const handleDeleteAssessment = (index) => {
+    const isConfirmed = window.confirm('Вы уверены, что хотите удалить эту оценку?');
+    if (isConfirmed) {
+      const updatedAssessments = assessments.filter((_, i) => i !== index);
+      saveToLocalStorage('assessments', updatedAssessments);
+      setAssessments(updatedAssessments);
+    }
   };
 
   return (
@@ -89,9 +98,14 @@ function HistoryPage() {
                     );
                   })}
                 </div>
-                <Button onClick={() => generateEmail(assessment.score)}>
-                  Сгенерировать письмо
-                </Button>
+                <div className="flex space-x-2 mt-4">
+                  <Button onClick={() => generateEmail(assessment.score)}>
+                    Сгенерировать письмо
+                  </Button>
+                  <Button onClick={() => handleDeleteAssessment(index)} variant="destructive">
+                    Удалить оценку
+                  </Button>
+                </div>
               </AccordionContent>
             </AccordionItem>
           ))}
