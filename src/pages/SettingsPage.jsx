@@ -7,38 +7,60 @@ import { Button } from '../components/ui/button';
 import { questions as defaultQuestions } from '../config/questions.js';
 
 function SettingsPage() {
-  const [customQuestions, setCustomQuestions] = useState([]);
+  const [allQuestions, setAllQuestions] = useState([]);
   const [newQuestionText, setNewQuestionText] = useState('');
   const [newQuestionWeight, setNewQuestionWeight] = useState(1);
+  const [editingQuestionId, setEditingQuestionId] = useState(null);
   const [emailTemplates, setEmailTemplates] = useState({ positive: '', negative: '' });
 
   useEffect(() => {
-    const savedQuestions = getFromLocalStorage('customQuestions', []);
-    setCustomQuestions(savedQuestions);
+    const savedCustomQuestions = getFromLocalStorage('customQuestions', []);
+    const combinedQuestions = [
+      ...defaultQuestions,
+      ...savedCustomQuestions
+    ];
+    setAllQuestions(combinedQuestions);
     const savedTemplates = getFromLocalStorage('emailTemplates', { positive: '', negative: '' });
     setEmailTemplates(savedTemplates);
   }, []);
 
-  const handleAddQuestion = () => {
+  const handleEditClick = (question) => {
+    setNewQuestionText(question.text);
+    setNewQuestionWeight(question.weight);
+    setEditingQuestionId(question.id);
+  };
+
+  const handleAddOrUpdateQuestion = () => {
     if (newQuestionText.trim() !== '') {
-      const weight = Math.max(1, Math.min(10, Number(newQuestionWeight)));
-      const newQuestion = {
-        id: Date.now(),
-        text: newQuestionText,
-        weight: weight,
-      };
-      const updatedQuestions = [...customQuestions, newQuestion];
-      setCustomQuestions(updatedQuestions);
-      saveToLocalStorage('customQuestions', updatedQuestions);
+      let updatedQuestions;
+      if (editingQuestionId) {
+        updatedQuestions = allQuestions.map(q =>
+          q.id === editingQuestionId
+            ? { ...q, text: newQuestionText, weight: Number(newQuestionWeight) }
+            : q
+        );
+        setEditingQuestionId(null);
+      } else {
+        const newQuestion = {
+          id: Date.now(),
+          text: newQuestionText,
+          weight: Number(newQuestionWeight),
+        };
+        updatedQuestions = [...allQuestions, newQuestion];
+      }
+      setAllQuestions(updatedQuestions);
+      const customQuestionsToSave = updatedQuestions.filter(q => !defaultQuestions.some(defaultQ => defaultQ.id === q.id));
+      saveToLocalStorage('customQuestions', customQuestionsToSave);
       setNewQuestionText('');
       setNewQuestionWeight(1);
     }
   };
 
   const handleDeleteQuestion = (id) => {
-    const updatedQuestions = customQuestions.filter(q => q.id !== id);
-    setCustomQuestions(updatedQuestions);
-    saveToLocalStorage('customQuestions', updatedQuestions);
+    const updatedQuestions = allQuestions.filter(q => q.id !== id);
+    setAllQuestions(updatedQuestions);
+    const customQuestionsToSave = updatedQuestions.filter(q => !defaultQuestions.some(defaultQ => defaultQ.id === q.id));
+    saveToLocalStorage('customQuestions', customQuestionsToSave);
   };
 
   const handleTemplateChange = (type, value) => {
@@ -56,18 +78,19 @@ function SettingsPage() {
         <CardContent className="pt-6">
           <h2 className="text-xl font-semibold mb-4">Управление вопросами</h2>
           <div className="space-y-4">
-            {defaultQuestions.map(q => (
-              <div key={q.id} className="flex items-center justify-between p-3 border rounded-md bg-gray-100">
-                <span>{q.text} ({q.weight} баллов)</span>
-                <span className="text-sm text-gray-500">По умолчанию</span>
-              </div>
-            ))}
-            {customQuestions.map(q => (
+            {allQuestions.map(q => (
               <div key={q.id} className="flex items-center justify-between p-3 border rounded-md">
                 <span>{q.text} ({q.weight} баллов)</span>
-                <Button onClick={() => handleDeleteQuestion(q.id)} variant="destructive" size="sm">
-                  Удалить
-                </Button>
+                <div className="space-x-2">
+                  <Button onClick={() => handleEditClick(q)} variant="outline" size="sm">
+                    Редактировать
+                  </Button>
+                  {defaultQuestions.every(defaultQ => defaultQ.id !== q.id) && (
+                    <Button onClick={() => handleDeleteQuestion(q.id)} variant="destructive" size="sm">
+                      Удалить
+                    </Button>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -92,8 +115,8 @@ function SettingsPage() {
                 onChange={(e) => setNewQuestionWeight(e.target.value)}
               />
             </div>
-            <Button onClick={handleAddQuestion} className="mt-auto">
-              Добавить
+            <Button onClick={handleAddOrUpdateQuestion} className="mt-auto">
+              {editingQuestionId ? 'Сохранить' : 'Добавить'}
             </Button>
           </div>
         </CardContent>
