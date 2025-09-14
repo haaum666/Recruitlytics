@@ -3,8 +3,8 @@ import { getFromLocalStorage, saveToLocalStorage } from '../services/localStorag
 import { Card, CardContent } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '../components/ui/accordion';
-import { questions } from '../config/questions.js';
-import { Button } from '../components/ui/button';
+import { questions as defaultQuestions } from '../config/questions.js';
+import { Button } from '../ui/button';
 import {
   Dialog,
   DialogContent,
@@ -14,6 +14,7 @@ import {
   DialogFooter,
 } from '../components/ui/dialog';
 import { Textarea } from '../components/ui/textarea';
+import html2pdf from 'html2pdf.js';
 
 function HistoryPage() {
   const [assessments, setAssessments] = useState([]);
@@ -21,12 +22,16 @@ function HistoryPage() {
   const [openDialog, setOpenDialog] = useState(false);
   const [generatedEmail, setGeneratedEmail] = useState('');
   const [copyButtonText, setCopyButtonText] = useState('Копировать');
+  const [currentQuestions, setCurrentQuestions] = useState([]);
 
   useEffect(() => {
     const savedAssessments = getFromLocalStorage('assessments', []);
     setAssessments(savedAssessments);
     const savedTemplates = getFromLocalStorage('emailTemplates', { positive: '', negative: '' });
     setEmailTemplates(savedTemplates);
+    const savedQuestions = getFromLocalStorage('customQuestions', []);
+    const combinedQuestions = [...defaultQuestions, ...savedQuestions];
+    setCurrentQuestions(combinedQuestions);
   }, []);
 
   const generateEmail = (score) => {
@@ -64,6 +69,37 @@ function HistoryPage() {
     }
   };
 
+  const generatePDF = (assessment) => {
+    const element = document.createElement('div');
+    element.className = 'p-6 bg-white';
+    element.innerHTML = `
+      <h1 class="text-3xl font-bold mb-4">Отчет по оценке кандидата</h1>
+      <p class="mb-2"><strong>Дата:</strong> ${new Date(assessment.date).toLocaleDateString()}</p>
+      <p class="mb-4"><strong>Итоговый балл:</strong> ${assessment.score}</p>
+      <h2 class="text-2xl font-semibold mb-4">Детали оценки</h2>
+      ${currentQuestions.map(q => {
+        const assessmentItem = assessment.data[q.id] || {};
+        return `
+          <div class="mb-4 p-3 border rounded-md">
+            <p class="font-medium">${q.text}</p>
+            <p class="text-sm text-gray-700 mt-1">Балл: ${assessmentItem.score || 'Не указан'}</p>
+            <p class="text-sm text-gray-700">Комментарий: ${assessmentItem.comment || 'Нет'}</p>
+          </div>
+        `;
+      }).join('')}
+    `;
+
+    const opt = {
+      margin:       1,
+      filename:     `отчет-оценка-${new Date(assessment.date).toLocaleDateString()}.pdf`,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2 },
+      jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+    
+    html2pdf().from(element).set(opt).save();
+  };
+
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-6">История оценок</h1>
@@ -84,7 +120,7 @@ function HistoryPage() {
               </AccordionTrigger>
               <AccordionContent className="p-4 bg-gray-50 border-t">
                 <div className="space-y-4 mb-4">
-                  {questions.map(question => {
+                  {currentQuestions.map(question => {
                     const assessmentItem = assessment.data[question.id] || {};
                     return (
                       <Card key={question.id} className="p-3">
@@ -104,6 +140,9 @@ function HistoryPage() {
                   </Button>
                   <Button onClick={() => handleDeleteAssessment(index)} variant="destructive">
                     Удалить оценку
+                  </Button>
+                  <Button onClick={() => generatePDF(assessment)} variant="secondary">
+                    Скачать PDF
                   </Button>
                 </div>
               </AccordionContent>
