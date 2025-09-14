@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { questions } from '../config/questions';
+import { questions } from '../config/questions.js';
 import QuestionItem from '../components/assessment/QuestionItem';
 
 function AssessmentPage() {
