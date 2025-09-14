@@ -15,8 +15,15 @@ function SettingsPage() {
 
   useEffect(() => {
     const savedCustomQuestions = getFromLocalStorage('customQuestions', []);
+    const savedModifiedDefaultQuestions = getFromLocalStorage('modifiedDefaultQuestions', []);
+
+    const mergedDefaultQuestions = defaultQuestions.map(defaultQ => {
+      const modified = savedModifiedDefaultQuestions.find(modQ => modQ.id === defaultQ.id);
+      return modified || defaultQ;
+    });
+
     const combinedQuestions = [
-      ...defaultQuestions,
+      ...mergedDefaultQuestions,
       ...savedCustomQuestions
     ];
     setAllQuestions(combinedQuestions);
@@ -39,7 +46,6 @@ function SettingsPage() {
             ? { ...q, text: newQuestionText, weight: Number(newQuestionWeight) }
             : q
         );
-        setEditingQuestionId(null);
       } else {
         const newQuestion = {
           id: Date.now(),
@@ -49,8 +55,16 @@ function SettingsPage() {
         updatedQuestions = [...allQuestions, newQuestion];
       }
       setAllQuestions(updatedQuestions);
+
+      const modifiedDefaultQuestions = updatedQuestions.filter(q =>
+        defaultQuestions.some(defaultQ => defaultQ.id === q.id)
+      );
+      saveToLocalStorage('modifiedDefaultQuestions', modifiedDefaultQuestions);
+
       const customQuestionsToSave = updatedQuestions.filter(q => !defaultQuestions.some(defaultQ => defaultQ.id === q.id));
       saveToLocalStorage('customQuestions', customQuestionsToSave);
+      
+      setEditingQuestionId(null);
       setNewQuestionText('');
       setNewQuestionWeight(1);
     }
