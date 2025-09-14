@@ -121,7 +121,7 @@ function HistoryPage() {
                     <span className="text-sm text-gray-600">Дата: {new Date(assessment.date).toLocaleDateString()}</span>
                   </div>
                   <Badge variant="secondary" className="text-base py-1 px-4">
-                    Балл: {assessment.score}
+                    Балл: {parseFloat(assessment.score).toFixed(2)}
                   </Badge>
                 </div>
               </AccordionTrigger>
