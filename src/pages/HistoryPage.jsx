@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
+  DialogFooter,
 } from '../components/ui/dialog';
 import { Textarea } from '../components/ui/textarea';
 
@@ -19,6 +20,7 @@ function HistoryPage() {
   const [emailTemplates, setEmailTemplates] = useState({});
   const [openDialog, setOpenDialog] = useState(false);
   const [generatedEmail, setGeneratedEmail] = useState('');
+  const [copyButtonText, setCopyButtonText] = useState('Копировать');
 
   useEffect(() => {
     const savedAssessments = getFromLocalStorage('assessments', []);
@@ -40,6 +42,17 @@ function HistoryPage() {
     const finalEmail = template.replace('[ИТОГОВЫЙ_БАЛЛ]', scoreText);
     setGeneratedEmail(finalEmail);
     setOpenDialog(true);
+  };
+
+  const handleCopyEmail = () => {
+    navigator.clipboard.writeText(generatedEmail)
+      .then(() => {
+        setCopyButtonText('Скопировано!');
+        setTimeout(() => setCopyButtonText('Копировать'), 2000);
+      })
+      .catch(err => {
+        console.error('Не удалось скопировать текст: ', err);
+      });
   };
 
   return (
@@ -100,6 +113,11 @@ function HistoryPage() {
             readOnly
             rows="10"
           />
+          <DialogFooter>
+            <Button onClick={handleCopyEmail}>
+              {copyButtonText}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
