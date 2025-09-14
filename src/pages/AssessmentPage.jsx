@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { questions } from '../config/questions.js';
 import QuestionItem from '../components/assessment/QuestionItem';
 import { saveToLocalStorage, getFromLocalStorage } from '../services/localStorageService.js';
+import { Card, CardContent } from '../components/ui/card';
+import { Button } from '../components/ui/button';
 
 function AssessmentPage() {
   const [assessmentData, setAssessmentData] = useState({});
@@ -58,15 +60,12 @@ function AssessmentPage() {
           />
         ))}
       </div>
-      <div className="mt-8 flex justify-between items-center p-4 border rounded-md shadow-lg bg-white">
-        <button
-          onClick={handleSaveAssessment}
-          className="px-6 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700 transition-colors"
-        >
-          Сохранить оценку
-        </button>
-        <h2 className="text-2xl font-semibold">Итоговый балл: {totalScore}</h2>
-      </div>
+      <Card className="mt-8">
+        <CardContent className="flex justify-between items-center">
+          <Button onClick={handleSaveAssessment}>Сохранить оценку</Button>
+          <h2 className="text-2xl font-semibold">Итоговый балл: {totalScore}</h2>
+        </CardContent>
+      </Card>
     </div>
   );
 }
