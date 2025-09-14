@@ -221,9 +221,16 @@ function AssessmentPage() {
                           <Button
                             onClick={() => handleScoreChange(question.id, (assessmentData[question.id]?.score || 0) - 1)}
                             variant="outline"
-                            className="rounded-r-none border-r-0 hover:bg-gray-100"
+                            className="rounded-r-none border-r-0 hover:bg-gray-100 w-10 h-10"
                           >
                             -
+                          </Button>
+                          <Button
+                            onClick={() => handleScoreChange(question.id, (assessmentData[question.id]?.score || 0) + 1)}
+                            variant="outline"
+                            className="rounded-none border-r-0 hover:bg-gray-100 w-10 h-10"
+                          >
+                            +
                           </Button>
                           <Input
                             ref={el => scoreInputRefs.current[question.id] = el}
@@ -234,15 +241,8 @@ function AssessmentPage() {
                             value={assessmentData[question.id]?.score || ''}
                             onChange={(e) => handleScoreChange(question.id, e.target.value)}
                             onKeyDown={(e) => handleScoreKeyDown(e, question.id)}
-                            className="rounded-none text-center"
+                            className="rounded-l-none text-center"
                           />
-                          <Button
-                            onClick={() => handleScoreChange(question.id, (assessmentData[question.id]?.score || 0) + 1)}
-                            variant="outline"
-                            className="rounded-l-none border-l-0 hover:bg-gray-100"
-                          >
-                            +
-                          </Button>
                         </div>
                       </div>
                       <div>
