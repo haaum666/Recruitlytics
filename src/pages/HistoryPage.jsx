@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getFromLocalStorage, saveToLocalStorage } from '../services/localStorageService.js';
-import { Card, CardContent } from '../components/ui/card';
+import { Card, CardContent, CardHeader } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '../components/ui/accordion';
 import { questions as defaultQuestions } from '../config/questions.js';
@@ -74,6 +74,8 @@ function HistoryPage() {
     element.className = 'p-6 bg-white';
     element.innerHTML = `
       <h1 class="text-3xl font-bold mb-4">Отчет по оценке кандидата</h1>
+      <p class="mb-2"><strong>ФИО:</strong> ${assessment.candidate.lastName} ${assessment.candidate.firstName}</p>
+      <p class="mb-2"><strong>Позиция:</strong> ${assessment.candidate.role}</p>
       <p class="mb-2"><strong>Дата:</strong> ${new Date(assessment.date).toLocaleDateString()}</p>
       <p class="mb-4"><strong>Итоговый балл:</strong> ${assessment.score}</p>
       <h2 class="text-2xl font-semibold mb-4">Детали оценки</h2>
@@ -91,7 +93,7 @@ function HistoryPage() {
 
     const opt = {
       margin:       1,
-      filename:     `отчет-оценка-${new Date(assessment.date).toLocaleDateString()}.pdf`,
+      filename:     `отчет-оценка-${assessment.candidate.lastName}-${new Date(assessment.date).toLocaleDateString()}.pdf`,
       image:        { type: 'jpeg', quality: 0.98 },
       html2canvas:  { scale: 2 },
       jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
@@ -110,7 +112,7 @@ function HistoryPage() {
               <AccordionTrigger className="p-4">
                 <div className="flex justify-between items-center w-full">
                   <div className="flex flex-col text-left">
-                    <span className="font-semibold">Оценка #{index + 1}</span>
+                    <span className="font-semibold">{assessment.candidate.firstName} {assessment.candidate.lastName}</span>
                     <span className="text-sm text-gray-600">Дата: {new Date(assessment.date).toLocaleDateString()}</span>
                   </div>
                   <Badge variant="secondary" className="text-base py-1 px-4">
@@ -119,6 +121,14 @@ function HistoryPage() {
                 </div>
               </AccordionTrigger>
               <AccordionContent className="p-4 bg-gray-50 border-t">
+                <div className="mb-4 space-y-2">
+                  <p><strong>Позиция:</strong> {assessment.candidate.role}</p>
+                  <p><strong>Возраст:</strong> {assessment.candidate.age || 'не указан'}</p>
+                  <p><strong>Локация:</strong> {assessment.candidate.location || 'не указана'}</p>
+                  <p><strong>ЗП:</strong> от {assessment.candidate.salaryMin || '0'} до {assessment.candidate.salaryMax || '0'} руб.</p>
+                  <p><strong>Телефон:</strong> {assessment.candidate.phone || 'не указан'}</p>
+                  <p><strong>Мессенджер:</strong> {assessment.candidate.messenger || 'не указан'}</p>
+                </div>
                 <div className="space-y-4 mb-4">
                   {currentQuestions.map(question => {
                     const assessmentItem = assessment.data[question.id] || {};
