@@ -74,9 +74,14 @@ function HistoryPage() {
     element.className = 'p-6 bg-white';
     element.innerHTML = `
       <h1 class="text-3xl font-bold mb-4">Отчет по оценке кандидата</h1>
-      <p class="mb-2"><strong>ФИО:</strong> ${assessment.candidate.lastName} ${assessment.candidate.firstName}</p>
+      <p class="mb-2"><strong>ФИО:</strong> ${assessment.candidate.firstName} ${assessment.candidate.lastName}</p>
       <p class="mb-2"><strong>Позиция:</strong> ${assessment.candidate.role}</p>
-      <p class="mb-2"><strong>Дата:</strong> ${new Date(assessment.date).toLocaleDateString()}</p>
+      <p class="mb-2"><strong>Возраст:</strong> ${assessment.candidate.age || 'не указан'}</p>
+      <p class="mb-2"><strong>Локация:</strong> ${assessment.candidate.location || 'не указана'}</p>
+      <p class="mb-2"><strong>ЗП:</strong> от ${assessment.candidate.salaryMin || '0'} до ${assessment.candidate.salaryMax || '0'} руб.</p>
+      <p class="mb-2"><strong>Телефон:</strong> ${assessment.candidate.phone || 'не указан'}</p>
+      <p class="mb-2"><strong>Мессенджер:</strong> ${assessment.candidate.messenger || 'не указан'}</p>
+      <p class="mb-2"><strong>Дата оценки:</strong> ${new Date(assessment.date).toLocaleDateString()}</p>
       <p class="mb-4"><strong>Итоговый балл:</strong> ${assessment.score}</p>
       <h2 class="text-2xl font-semibold mb-4">Детали оценки</h2>
       ${currentQuestions.map(q => {
@@ -93,7 +98,7 @@ function HistoryPage() {
 
     const opt = {
       margin:       1,
-      filename:     `отчет-оценка-${assessment.candidate.lastName}-${new Date(assessment.date).toLocaleDateString()}.pdf`,
+      filename:     `отчет-оценка-${assessment.candidate.lastName || ''}-${new Date(assessment.date).toLocaleDateString()}.pdf`,
       image:        { type: 'jpeg', quality: 0.98 },
       html2canvas:  { scale: 2 },
       jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
