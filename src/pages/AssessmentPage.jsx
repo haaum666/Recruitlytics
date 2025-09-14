@@ -58,11 +58,19 @@ function AssessmentPage() {
   };
 
   const calculateTotalScore = () => {
-    return questions.reduce((total, question) => {
+    const totalWeightedScore = questions.reduce((total, question) => {
       const item = assessmentData[question.id] || {};
       const score = item.score || 0;
       return total + score * question.weight;
     }, 0);
+    
+    const totalWeight = questions.reduce((total, question) => total + question.weight, 0);
+
+    if (totalWeight === 0) {
+      return 0;
+    }
+
+    return (totalWeightedScore / totalWeight).toFixed(2);
   };
 
   const saveAssessment = () => {
