@@ -7,10 +7,29 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
 } from '../ui/dialog';
+import { Label } from '../ui/label';
+import { Input } from '../ui/input';
 
 function QuestionsEditor() {
   const [open, setOpen] = useState(false);
+  const [newQuestion, setNewQuestion] = useState({ text: '', weight: 1 });
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setNewQuestion(prevState => ({
+      ...prevState,
+      [name]: value,
+    }));
+  };
+
+  const handleAddQuestion = () => {
+    // Временно просто выводим данные в консоль
+    // Потом здесь будет логика сохранения
+    console.log(newQuestion);
+    setOpen(false); // Закрываем модальное окно после сохранения
+  };
 
   return (
     <div className="p-4 border rounded-md bg-white shadow-sm">
@@ -24,7 +43,37 @@ function QuestionsEditor() {
             <DialogHeader>
               <DialogTitle>Добавить новый вопрос</DialogTitle>
             </DialogHeader>
-            {/* Здесь будет форма для добавления вопроса */}
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="text" className="text-right">
+                  Текст
+                </Label>
+                <Input
+                  id="text"
+                  name="text"
+                  value={newQuestion.text}
+                  onChange={handleInputChange}
+                  className="col-span-3"
+                />
+              </div>
+              <div className="grid grid-cols-4 items-center gap-4">
+                <Label htmlFor="weight" className="text-right">
+                  Вес
+                </Label>
+                <Input
+                  id="weight"
+                  name="weight"
+                  type="number"
+                  min="1"
+                  value={newQuestion.weight}
+                  onChange={handleInputChange}
+                  className="col-span-3"
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button type="button" onClick={handleAddQuestion}>Сохранить</Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </div>
