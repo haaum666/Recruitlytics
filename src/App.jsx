@@ -21,7 +21,7 @@ function App() {
   };
 
   return (
-    <Layout>
+    <Layout onPageChange={setCurrentPage}>
       {renderPage()}
     </Layout>
   );
