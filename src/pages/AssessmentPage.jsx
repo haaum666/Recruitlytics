@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { questions } from '../config/questions.js';
 import QuestionItem from '../components/assessment/QuestionItem';
 
 function AssessmentPage() {
   const [assessmentData, setAssessmentData] = useState({});
+  const [totalScore, setTotalScore] = useState(0);
 
   const handleInputChange = (id, field, value) => {
     setAssessmentData(prevData => ({
@@ -14,6 +15,21 @@ function AssessmentPage() {
       },
     }));
   };
+
+  useEffect(() => {
+    const calculateTotalScore = () => {
+      let score = 0;
+      for (const question of questions) {
+        const data = assessmentData[question.id];
+        if (data && data.score) {
+          score += data.score;
+        }
+      }
+      setTotalScore(score);
+    };
+
+    calculateTotalScore();
+  }, [assessmentData]);
 
   return (
     <div className="p-6">
@@ -26,6 +42,9 @@ function AssessmentPage() {
             onInputChange={(field, value) => handleInputChange(question.id, field, value)}
           />
         ))}
+      </div>
+      <div className="mt-8 p-4 border rounded-md shadow-lg bg-white text-right">
+        <h2 className="text-2xl font-semibold">Итоговый балл: {totalScore}</h2>
       </div>
     </div>
   );
