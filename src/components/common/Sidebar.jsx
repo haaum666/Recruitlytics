@@ -10,7 +10,7 @@ function Sidebar({ onPageChange }) {
       <nav className="space-y-2">
         <Button variant="ghost" className="w-full justify-start" onClick={() => onPageChange('assessment')}>Новая оценка</Button>
         <Button variant="ghost" className="w-full justify-start" onClick={() => onPageChange('history')}>История</Button>
-        <Button variant="ghost" className="w-full justify-start">Настройки</Button>
+        <Button variant="ghost" className="w-full justify-start" onClick={() => onPageChange('settings')}>Настройки</Button>
       </nav>
     </aside>
   );
