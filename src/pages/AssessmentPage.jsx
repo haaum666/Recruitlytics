@@ -166,9 +166,13 @@ function AssessmentPage() {
               <Label htmlFor="age">Возраст</Label>
               <Input id="age" type="number" value={candidateData.age} onChange={handleCandidateChange} />
             </div>
-            <div className="sm:col-span-2">
+            <div>
               <Label htmlFor="salary">ЗП</Label>
-              <Input id="salary" value={candidateData.salary} onChange={handleCandidateChange} placeholder="1000$ - 1500$" />
+              <Input id="salary" value={candidateData.salary} onChange={handleCandidateChange} placeholder="1000₽ - 1500₽" />
+            </div>
+            <div>
+              <Label htmlFor="phone">Телефон</Label>
+              <Input id="phone" type="tel" value={candidateData.phone} onChange={handleCandidateChange} />
             </div>
             <div>
               <Label htmlFor="messenger">Мессенджер</Label>
@@ -177,10 +181,6 @@ function AssessmentPage() {
             <div>
               <Label htmlFor="location">Локация</Label>
               <Input id="location" value={candidateData.location} onChange={handleCandidateChange} />
-            </div>
-            <div>
-              <Label htmlFor="phone">Телефон</Label>
-              <Input id="phone" type="tel" value={candidateData.phone} onChange={handleCandidateChange} />
             </div>
           </div>
         </CardContent>
