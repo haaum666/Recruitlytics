@@ -1,12 +1,16 @@
 import React from 'react';
+import QuestionsEditor from '../components/settings/QuestionsEditor';
 
 function SettingsPage() {
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-6">Настройки</h1>
-      <p className="text-gray-600">
-        Здесь будет располагаться интерфейс для управления вопросами, их весами и шаблонами писем.
+      <p className="text-gray-600 mb-6">
+        Здесь вы можете управлять вопросами, весами и шаблонами писем.
       </p>
+      <div className="space-y-6">
+        <QuestionsEditor />
+      </div>
     </div>
   );
 }
