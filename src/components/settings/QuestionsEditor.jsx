@@ -1,10 +1,33 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { questions } from '../../config/questions.js';
+import { Button } from '../ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '../ui/dialog';
 
 function QuestionsEditor() {
+  const [open, setOpen] = useState(false);
+
   return (
     <div className="p-4 border rounded-md bg-white shadow-sm">
-      <h2 className="text-xl font-semibold mb-4">Управление вопросами</h2>
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold">Управление вопросами</h2>
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button>Добавить вопрос</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Добавить новый вопрос</DialogTitle>
+            </DialogHeader>
+            {/* Здесь будет форма для добавления вопроса */}
+          </DialogContent>
+        </Dialog>
+      </div>
       <ul className="space-y-4">
         {questions.map(q => (
           <li key={q.id} className="p-3 border rounded-md bg-gray-50 flex justify-between items-center">
