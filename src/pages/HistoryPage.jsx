@@ -4,14 +4,43 @@ import { Card, CardContent } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '../components/ui/accordion';
 import { questions } from '../config/questions.js';
+import { Button } from '../components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '../components/ui/dialog';
+import { Textarea } from '../components/ui/textarea';
 
 function HistoryPage() {
   const [assessments, setAssessments] = useState([]);
+  const [emailTemplates, setEmailTemplates] = useState({});
+  const [openDialog, setOpenDialog] = useState(false);
+  const [generatedEmail, setGeneratedEmail] = useState('');
 
   useEffect(() => {
     const savedAssessments = getFromLocalStorage('assessments', []);
     setAssessments(savedAssessments);
+    const savedTemplates = getFromLocalStorage('emailTemplates', { positive: '', negative: '' });
+    setEmailTemplates(savedTemplates);
   }, []);
+
+  const generateEmail = (score) => {
+    let template = '';
+    const scoreText = `Итоговый балл: ${score}`;
+    
+    if (score >= 50) { // Используем 50 как пороговое значение для примера
+      template = emailTemplates.positive || 'Шаблон положительной оценки не найден.';
+    } else {
+      template = emailTemplates.negative || 'Шаблон отрицательной оценки не найден.';
+    }
+
+    const finalEmail = template.replace('[ИТОГОВЫЙ_БАЛЛ]', scoreText);
+    setGeneratedEmail(finalEmail);
+    setOpenDialog(true);
+  };
 
   return (
     <div className="p-6">
@@ -32,7 +61,7 @@ function HistoryPage() {
                 </div>
               </AccordionTrigger>
               <AccordionContent className="p-4 bg-gray-50 border-t">
-                <div className="space-y-4">
+                <div className="space-y-4 mb-4">
                   {questions.map(question => {
                     const assessmentItem = assessment.data[question.id] || {};
                     return (
@@ -47,6 +76,9 @@ function HistoryPage() {
                     );
                   })}
                 </div>
+                <Button onClick={() => generateEmail(assessment.score)}>
+                  Сгенерировать письмо
+                </Button>
               </AccordionContent>
             </AccordionItem>
           ))}
@@ -54,6 +86,22 @@ function HistoryPage() {
       ) : (
         <p className="text-gray-500">Пока нет сохраненных оценок.</p>
       )}
+
+      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Сгенерированное письмо</DialogTitle>
+            <DialogDescription>
+              Текст письма, готовый для отправки.
+            </DialogDescription>
+          </DialogHeader>
+          <Textarea
+            value={generatedEmail}
+            readOnly
+            rows="10"
+          />
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
