@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getFromLocalStorage } from '../services/localStorageService.js';
+import { Card, CardContent } from '../components/ui/card';
+import { Badge } from '../components/ui/badge';
 
 function HistoryPage() {
   const [assessments, setAssessments] = useState([]);
@@ -15,13 +17,17 @@ function HistoryPage() {
       {assessments.length > 0 ? (
         <ul className="space-y-4">
           {assessments.map((assessment, index) => (
-            <li key={index} className="p-4 border rounded-md shadow-sm bg-white">
-              <div className="flex justify-between items-center">
-                <span className="font-semibold">Оценка #{index + 1}</span>
-                <span className="text-gray-600">Дата: {new Date(assessment.date).toLocaleDateString()}</span>
-              </div>
-              <p className="mt-2 text-xl font-bold">Итоговый балл: {assessment.score}</p>
-            </li>
+            <Card key={index} className="p-4">
+              <CardContent className="flex justify-between items-center p-0">
+                <div className="flex flex-col">
+                  <span className="font-semibold">Оценка #{index + 1}</span>
+                  <span className="text-sm text-gray-600">Дата: {new Date(assessment.date).toLocaleDateString()}</span>
+                </div>
+                <Badge variant="secondary" className="text-base py-1 px-4">
+                  Балл: {assessment.score}
+                </Badge>
+              </CardContent>
+            </Card>
           ))}
         </ul>
       ) : (
