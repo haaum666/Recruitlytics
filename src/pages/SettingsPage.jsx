@@ -1,5 +1,6 @@
 import React from 'react';
 import QuestionsEditor from '../components/settings/QuestionsEditor';
+import EmailTemplateEditor from '../components/settings/EmailTemplateEditor';
 
 function SettingsPage() {
   return (
@@ -10,6 +11,7 @@ function SettingsPage() {
       </p>
       <div className="space-y-6">
         <QuestionsEditor />
+        <EmailTemplateEditor />
       </div>
     </div>
   );
