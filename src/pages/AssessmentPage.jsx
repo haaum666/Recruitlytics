@@ -35,10 +35,18 @@ function AssessmentPage() {
     );
   }, []);
 
-  const handleScoreChange = (id, score) => {
+  const handleScoreChange = (id, value) => {
+    const score = Number(value);
+    let validatedScore = score;
+    if (score > 10) {
+      validatedScore = 10;
+    } else if (score < 0) {
+      validatedScore = 0;
+    }
+    
     setAssessmentData(prevData => ({
       ...prevData,
-      [id]: { ...prevData[id], score: Number(score) },
+      [id]: { ...prevData[id], score: validatedScore },
     }));
   };
 
@@ -69,7 +77,6 @@ function AssessmentPage() {
       return 0;
     }
     
-    // Масштабируем результат к 10-балльной шкале, как ты и хотел
     const finalScore = (totalWeightedScore / totalPossibleScore) * 10;
     
     return finalScore.toFixed(2);
