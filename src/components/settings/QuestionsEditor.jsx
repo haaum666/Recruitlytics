@@ -17,6 +17,7 @@ function QuestionsEditor() {
   const [open, setOpen] = useState(false);
   const [newQuestion, setNewQuestion] = useState({ text: '', weight: 1, type: 'boolean' });
   const [currentQuestions, setCurrentQuestions] = useState([]);
+  const [editingQuestion, setEditingQuestion] = useState(null);
 
   const loadQuestions = () => {
     const savedQuestions = getFromLocalStorage('customQuestions', []);
@@ -36,29 +37,50 @@ function QuestionsEditor() {
     }));
   };
 
-  const handleAddQuestion = () => {
-    const customQuestions = getFromLocalStorage('customQuestions', []);
-    const newId = `custom_${Date.now()}`;
-    const questionToAdd = { ...newQuestion, id: newId };
+  const handleOpenDialog = (question = null) => {
+    if (question) {
+      setEditingQuestion(question);
+      setNewQuestion(question);
+    } else {
+      setEditingQuestion(null);
+      setNewQuestion({ text: '', weight: 1, type: 'boolean' });
+    }
+    setOpen(true);
+  };
 
-    const updatedCustomQuestions = [...customQuestions, questionToAdd];
+  const handleSaveQuestion = () => {
+    const customQuestions = getFromLocalStorage('customQuestions', []);
+    let updatedCustomQuestions;
+
+    if (editingQuestion) {
+      // Редактирование существующего вопроса
+      updatedCustomQuestions = customQuestions.map(q =>
+        q.id === editingQuestion.id ? { ...newQuestion, id: q.id } : q
+      );
+    } else {
+      // Добавление нового вопроса
+      const newId = `custom_${Date.now()}`;
+      const questionToAdd = { ...newQuestion, id: newId };
+      updatedCustomQuestions = [...customQuestions, questionToAdd];
+    }
+
     saveToLocalStorage('customQuestions', updatedCustomQuestions);
-    loadQuestions(); // Перезагружаем вопросы для обновления интерфейса
+    loadQuestions();
     
     setOpen(false);
     setNewQuestion({ text: '', weight: 1, type: 'boolean' });
+    setEditingQuestion(null);
   };
   
   const handleDeleteQuestion = (id) => {
     const customQuestions = getFromLocalStorage('customQuestions', []);
     const updatedCustomQuestions = customQuestions.filter(q => q.id !== id);
     saveToLocalStorage('customQuestions', updatedCustomQuestions);
-    loadQuestions(); // Перезагружаем вопросы для обновления интерфейса
+    loadQuestions();
   };
-  
-  const handleEditQuestion = (question) => {
-    // Эта функция будет реализована в следующем шаге
-    console.log("Редактирование вопроса:", question);
+
+  const isDefaultQuestion = (id) => {
+    return defaultQuestions.some(q => q.id === id);
   };
 
   return (
@@ -67,11 +89,11 @@ function QuestionsEditor() {
         <h2 className="text-xl font-semibold">Управление вопросами</h2>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button>Добавить вопрос</Button>
+            <Button onClick={() => handleOpenDialog()}>Добавить вопрос</Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Добавить новый вопрос</DialogTitle>
+              <DialogTitle>{editingQuestion ? 'Редактировать вопрос' : 'Добавить новый вопрос'}</DialogTitle>
             </DialogHeader>
             <div className="grid gap-4 py-4">
               <div className="grid grid-cols-4 items-center gap-4">
@@ -102,7 +124,7 @@ function QuestionsEditor() {
               </div>
             </div>
             <DialogFooter>
-              <Button type="button" onClick={handleAddQuestion}>Сохранить</Button>
+              <Button type="button" onClick={handleSaveQuestion}>Сохранить</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -112,8 +134,8 @@ function QuestionsEditor() {
           <li key={q.id} className="p-3 border rounded-md bg-gray-50 flex justify-between items-center">
             <span>{q.text} (Вес: {q.weight})</span>
             <div className="space-x-2">
-              <Button onClick={() => handleEditQuestion(q)} variant="ghost" className="text-blue-600 hover:text-blue-800">Редактировать</Button>
-              <Button onClick={() => handleDeleteQuestion(q.id)} variant="ghost" className="text-red-600 hover:text-red-800">Удалить</Button>
+              <Button onClick={() => handleOpenDialog(q)} variant="ghost" className="text-blue-600 hover:text-blue-800">Редактировать</Button>
+              <Button onClick={() => handleDeleteQuestion(q.id)} variant="ghost" className="text-red-600 hover:text-red-800" disabled={isDefaultQuestion(q.id)}>Удалить</Button>
             </div>
           </li>
         ))}
