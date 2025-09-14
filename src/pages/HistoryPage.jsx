@@ -21,6 +21,8 @@ function HistoryPage() {
   const [emailTemplates, setEmailTemplates] = useState({});
   const [openDialog, setOpenDialog] = useState(false);
   const [generatedEmail, setGeneratedEmail] = useState('');
+  const [openCoverLetterDialog, setOpenCoverLetterDialog] = useState(false);
+  const [generatedCoverLetter, setGeneratedCoverLetter] = useState('');
   const [copyButtonText, setCopyButtonText] = useState('Копировать');
   const [currentQuestions, setCurrentQuestions] = useState([]);
 
@@ -49,11 +51,53 @@ function HistoryPage() {
     setOpenDialog(true);
   };
 
-  const handleCopyEmail = () => {
-    navigator.clipboard.writeText(generatedEmail)
+  const generateCoverLetter = (assessment) => {
+    const { candidate, data } = assessment;
+    
+    const briefProfileNotes = currentQuestions.map(q => {
+        const item = data[q.id];
+        return item && item.comment ? `- ${item.comment}` : '';
+    }).filter(note => note).join('\n');
+
+    const template = `Вакансия: ${candidate.role || '[Название вакансии]'}
+Кандидат: ${candidate.firstName || ''} ${candidate.lastName || ''}
+Итоговый балл: ${assessment.score} (по 10-балльной взвешенной шкале)
+
+---
+
+**Краткое описание методологии оценки:**
+Оценка кандидата производилась по взвешенной системе, где каждый критерий имеет свой "вес" в зависимости от его важности для вакансии. Итоговый балл является взвешенным средним от всех оценок и отражает процент соответствия кандидата всем ключевым требованиям, с учетом их приоритетности.
+
+---
+
+Локация проживания: ${candidate.location || '[Город]'}
+Ожидания по зарплате: от ${candidate.salaryMin || '0'} до ${candidate.salaryMax || '0'} руб.
+Телефон: ${candidate.phone || ''}
+Мессенджер: ${candidate.messenger || ''}
+
+Краткий профиль кандидата:
+${briefProfileNotes || '[Нет комментариев]'}.
+
+Сильные стороны кандидата:
+[Навык 1 — кратко]
+[Навык 2 — кратко]
+[Подход / опыт в команде / продуктовый фокус]
+
+Потенциальные зоны внимания:
+[Если есть что-то, что нужно учитывать — нестабильная работа, переезд, низкий опыт в чём-то, но компенсируемый другим.]
+
+Комментарий по мотивации:
+[Почему рассматривает вакансию, что ищет, какие задачи интересны.]
+    `;
+    setGeneratedCoverLetter(template);
+    setOpenCoverLetterDialog(true);
+  };
+
+  const handleCopy = (text, setButtonText) => {
+    navigator.clipboard.writeText(text)
       .then(() => {
-        setCopyButtonText('Скопировано!');
-        setTimeout(() => setCopyButtonText('Копировать'), 2000);
+        setButtonText('Скопировано!');
+        setTimeout(() => setButtonText('Копировать'), 2000);
       })
       .catch(err => {
         console.error('Не удалось скопировать текст: ', err);
@@ -153,11 +197,14 @@ function HistoryPage() {
                   <Button onClick={() => generateEmail(assessment.score)}>
                     Сгенерировать письмо
                   </Button>
-                  <Button onClick={() => handleDeleteAssessment(index)} variant="destructive">
-                    Удалить оценку
-                  </Button>
                   <Button onClick={() => generatePDF(assessment)} variant="secondary">
                     Скачать PDF
+                  </Button>
+                  <Button onClick={() => generateCoverLetter(assessment)} variant="outline">
+                    Сопроводительное письмо
+                  </Button>
+                  <Button onClick={() => handleDeleteAssessment(index)} variant="destructive">
+                    Удалить оценку
                   </Button>
                 </div>
               </AccordionContent>
@@ -182,12 +229,34 @@ function HistoryPage() {
             rows="10"
           />
           <DialogFooter>
-            <Button onClick={handleCopyEmail}>
+            <Button onClick={() => handleCopy(generatedEmail, setCopyButtonText)}>
               {copyButtonText}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      
+      <Dialog open={openCoverLetterDialog} onOpenChange={setOpenCoverLetterDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Сгенерированное сопроводительное письмо</DialogTitle>
+            <DialogDescription>
+              Текст, который можно использовать для отчета. Части в скобках нужно заполнить вручную.
+            </DialogDescription>
+          </DialogHeader>
+          <Textarea
+            value={generatedCoverLetter}
+            readOnly
+            rows="15"
+          />
+          <DialogFooter>
+            <Button onClick={() => handleCopy(generatedCoverLetter, setCopyButtonText)}>
+              {copyButtonText}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }
