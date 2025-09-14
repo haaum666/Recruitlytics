@@ -4,7 +4,7 @@ import { Card, CardContent } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '../components/ui/accordion';
 import { questions as defaultQuestions } from '../config/questions.js';
-import { Button } from '../ui/button';
+import { Button } from '../components/ui/button';
 import {
   Dialog,
   DialogContent,
