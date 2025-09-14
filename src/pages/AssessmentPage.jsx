@@ -159,18 +159,6 @@ function AssessmentPage() {
               <Input id="lastName" value={candidateData.lastName} onChange={handleCandidateChange} />
             </div>
             <div>
-              <Label htmlFor="role">Позиция</Label>
-              <Input id="role" value={candidateData.role} onChange={handleCandidateChange} />
-            </div>
-            <div>
-              <Label htmlFor="age">Возраст</Label>
-              <Input id="age" type="number" value={candidateData.age} onChange={handleCandidateChange} />
-            </div>
-            <div>
-              <Label htmlFor="salary">ЗП</Label>
-              <Input id="salary" value={candidateData.salary} onChange={handleCandidateChange} placeholder="1000₽ - 1500₽" />
-            </div>
-            <div>
               <Label htmlFor="phone">Телефон</Label>
               <Input id="phone" type="tel" value={candidateData.phone} onChange={handleCandidateChange} />
             </div>
@@ -179,8 +167,20 @@ function AssessmentPage() {
               <Input id="messenger" value={candidateData.messenger} onChange={handleCandidateChange} />
             </div>
             <div>
+              <Label htmlFor="age">Возраст</Label>
+              <Input id="age" type="number" value={candidateData.age} onChange={handleCandidateChange} />
+            </div>
+            <div>
               <Label htmlFor="location">Локация</Label>
               <Input id="location" value={candidateData.location} onChange={handleCandidateChange} />
+            </div>
+            <div>
+              <Label htmlFor="role">Позиция</Label>
+              <Input id="role" value={candidateData.role} onChange={handleCandidateChange} />
+            </div>
+            <div>
+              <Label htmlFor="salary">Ожидания ЗП (min-комфорт)</Label>
+              <Input id="salary" value={candidateData.salary} onChange={handleCandidateChange} placeholder="1000₽ - 1500₽" />
             </div>
           </div>
         </CardContent>
