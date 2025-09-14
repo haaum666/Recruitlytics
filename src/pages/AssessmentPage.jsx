@@ -205,10 +205,10 @@ function AssessmentPage() {
               
               return (
                 <AccordionItem key={question.id} value={question.id}>
-                  <AccordionTrigger className="flex justify-between items-center w-full p-4 rounded-lg hover:bg-gray-100 transition-colors duration-200 cursor-pointer no-underline hover:no-underline [&[data-state=open]]:bg-gray-100">
+                  <AccordionTrigger className="flex justify-between items-center w-full p-4 rounded-lg hover:bg-gray-100 transition-colors duration-200 cursor-pointer no-underline hover:no-underline data-[state=open]:bg-gray-100 [&_div]:no-underline [&_span]:no-underline">
                     <div className="flex-1 text-left">{question.text} ({question.weight} баллов)</div>
                     {!isItemOpen && (currentScore > 0 || currentComment) && (
-                      <div className="ml-4 flex items-center p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-sm flex-shrink-0 hover:no-underline">
+                      <div className="ml-4 flex items-center p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-sm flex-shrink-0 no-underline">
                         {currentScore > 0 && <span className="no-underline">Балл: {currentScore}</span>}
                         {currentComment && (
                           <span className={`ml-2 ${currentScore > 0 ? 'border-l border-gray-300 pl-2' : ''} no-underline`}>
