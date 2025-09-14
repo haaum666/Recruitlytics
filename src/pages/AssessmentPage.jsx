@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { getFromLocalStorage, saveToLocalStorage } from '../services/localStorageService.js';
 import { Card, CardContent, CardHeader } from '../components/ui/card';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '../components/ui/accordion';
@@ -22,6 +22,8 @@ function AssessmentPage() {
     messenger: '',
     role: '',
   });
+
+  const scoreInputRefs = useRef({});
 
   useEffect(() => {
     const savedQuestions = getFromLocalStorage('customQuestions', []);
@@ -96,6 +98,12 @@ function AssessmentPage() {
     alert('Оценка сохранена!');
   };
 
+  const handleAccordionOpen = (value) => {
+    if (value && scoreInputRefs.current[value]) {
+      scoreInputRefs.current[value].focus();
+    }
+  };
+
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-6">Новая оценка</h1>
@@ -146,7 +154,7 @@ function AssessmentPage() {
           </CardContent>
         </Card>
 
-        <Accordion type="single" collapsible className="w-full">
+        <Accordion type="single" collapsible className="w-full" onValueChange={handleAccordionOpen}>
           {questions.map((question) => (
             <AccordionItem key={question.id} value={question.id}>
               <AccordionTrigger>{question.text} ({question.weight} баллов)</AccordionTrigger>
@@ -154,14 +162,31 @@ function AssessmentPage() {
                 <div className="space-y-4">
                   <div>
                     <Label htmlFor={`score-${question.id}`}>Балл (0-10)</Label>
-                    <Input
-                      id={`score-${question.id}`}
-                      type="number"
-                      min="0"
-                      max="10"
-                      value={assessmentData[question.id]?.score || ''}
-                      onChange={(e) => handleScoreChange(question.id, e.target.value)}
-                    />
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        onClick={() => handleScoreChange(question.id, (assessmentData[question.id]?.score || 0) - 1)}
+                        variant="outline"
+                        size="icon"
+                      >
+                        -
+                      </Button>
+                      <Input
+                        ref={el => scoreInputRefs.current[question.id] = el}
+                        id={`score-${question.id}`}
+                        type="number"
+                        min="0"
+                        max="10"
+                        value={assessmentData[question.id]?.score || ''}
+                        onChange={(e) => handleScoreChange(question.id, e.target.value)}
+                      />
+                      <Button
+                        onClick={() => handleScoreChange(question.id, (assessmentData[question.id]?.score || 0) + 1)}
+                        variant="outline"
+                        size="icon"
+                      >
+                        +
+                      </Button>
+                    </div>
                   </div>
                   <div>
                     <Label htmlFor={`comment-${question.id}`}>Комментарий</Label>
