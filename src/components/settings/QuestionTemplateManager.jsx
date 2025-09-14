@@ -10,7 +10,6 @@ function QuestionTemplateManager() {
   const [savedTemplates, setSavedTemplates] = useState({});
 
   useEffect(() => {
-    // Загружаем сохраненные шаблоны при загрузке компонента
     const templates = getFromLocalStorage('questionTemplates', {});
     setSavedTemplates(templates);
   }, []);
@@ -39,6 +38,26 @@ function QuestionTemplateManager() {
     alert(`Шаблон "${templateName}" успешно сохранен!`);
   };
 
+  const handleLoadTemplate = (name) => {
+    const isConfirmed = window.confirm(`Вы уверены, что хотите загрузить шаблон "${name}"? Текущие вопросы будут заменены.`);
+    if (isConfirmed) {
+      const template = savedTemplates[name];
+      saveToLocalStorage('customQuestions', template);
+      alert(`Шаблон "${name}" успешно загружен! Пожалуйста, обновите страницу, чтобы увидеть изменения.`);
+    }
+  };
+
+  const handleDeleteTemplate = (name) => {
+    const isConfirmed = window.confirm(`Вы уверены, что хотите удалить шаблон "${name}"?`);
+    if (isConfirmed) {
+      const updatedTemplates = { ...savedTemplates };
+      delete updatedTemplates[name];
+      saveToLocalStorage('questionTemplates', updatedTemplates);
+      setSavedTemplates(updatedTemplates);
+      alert(`Шаблон "${name}" успешно удален.`);
+    }
+  };
+
   return (
     <Card className="p-4">
       <CardHeader className="p-0 pb-4">
@@ -65,6 +84,10 @@ function QuestionTemplateManager() {
               {Object.keys(savedTemplates).map(name => (
                 <li key={name} className="flex justify-between items-center p-2 border rounded-md">
                   <span>{name}</span>
+                  <div className="space-x-2">
+                    <Button onClick={() => handleLoadTemplate(name)} variant="secondary">Загрузить</Button>
+                    <Button onClick={() => handleDeleteTemplate(name)} variant="destructive">Удалить</Button>
+                  </div>
                 </li>
               ))}
             </ul>
