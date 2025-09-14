@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { questions } from '../config/questions.js';
+import { questions as defaultQuestions } from '../config/questions.js';
 import QuestionItem from '../components/assessment/QuestionItem';
 import { saveToLocalStorage, getFromLocalStorage } from '../services/localStorageService.js';
 import { Card, CardContent } from '../components/ui/card';
@@ -8,11 +8,21 @@ import { Button } from '../components/ui/button';
 function AssessmentPage() {
   const [assessmentData, setAssessmentData] = useState({});
   const [totalScore, setTotalScore] = useState(0);
+  const [currentQuestions, setCurrentQuestions] = useState([]);
+
+  useEffect(() => {
+    const savedQuestions = getFromLocalStorage('customQuestions', []);
+    if (savedQuestions.length > 0) {
+      setCurrentQuestions([...defaultQuestions, ...savedQuestions]);
+    } else {
+      setCurrentQuestions(defaultQuestions);
+    }
+  }, []);
 
   useEffect(() => {
     const calculateTotalScore = () => {
       let score = 0;
-      for (const question of questions) {
+      for (const question of currentQuestions) {
         const data = assessmentData[question.id];
         if (data && data.score) {
           score += data.score;
@@ -22,7 +32,7 @@ function AssessmentPage() {
     };
 
     calculateTotalScore();
-  }, [assessmentData]);
+  }, [assessmentData, currentQuestions]);
 
   const handleInputChange = (id, field, value) => {
     setAssessmentData(prevData => ({
@@ -52,7 +62,7 @@ function AssessmentPage() {
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-6">Новая оценка кандидата</h1>
       <div className="space-y-4">
-        {questions.map(question => (
+        {currentQuestions.map(question => (
           <QuestionItem
             key={question.id}
             question={question}
