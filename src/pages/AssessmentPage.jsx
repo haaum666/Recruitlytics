@@ -15,14 +15,17 @@ function AssessmentPage() {
     firstName: '',
     lastName: '',
     age: '',
-    salaryRange: '',
+    salaryMin: '',
+    salaryMax: '',
     location: '',
     phone: '',
     messenger: '',
     role: '',
   });
+  const [openAccordion, setOpenAccordion] = useState('');
 
   const scoreInputRefs = useRef({});
+  const commentInputRefs = useRef({});
 
   useEffect(() => {
     const savedQuestions = getFromLocalStorage('customQuestions', []);
@@ -98,8 +101,33 @@ function AssessmentPage() {
   };
 
   const handleAccordionOpen = (value) => {
+    setOpenAccordion(value);
     if (value && scoreInputRefs.current[value]) {
-      scoreInputRefs.current[value].focus();
+      setTimeout(() => scoreInputRefs.current[value].focus(), 0);
+    }
+  };
+
+  const handleScoreKeyDown = (e, questionId) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const commentInput = commentInputRefs.current[questionId];
+      if (commentInput) {
+        commentInput.focus();
+      }
+    }
+  };
+
+  const handleCommentKeyDown = (e, questionId, index) => {
+    if (e.key === 'Enter' && !e.ctrlKey) {
+      e.preventDefault();
+      const nextQuestionId = questions[index + 1]?.id;
+      if (nextQuestionId) {
+        setOpenAccordion(nextQuestionId);
+      } else {
+        setOpenAccordion('');
+      }
+    } else if (e.key === 'Enter' && e.ctrlKey) {
+      e.target.value += '\n';
     }
   };
 
@@ -140,12 +168,12 @@ function AssessmentPage() {
               <Input id="age" type="number" value={candidateData.age} onChange={handleCandidateChange} />
             </div>
             <div>
-              <Label htmlFor="salaryRange">Вилка ЗП</Label>
-              <Input id="salaryRange" value={candidateData.salaryRange} onChange={handleCandidateChange} />
+              <Label htmlFor="salaryMin">ЗП, мин</Label>
+              <Input id="salaryMin" type="number" value={candidateData.salaryMin} onChange={handleCandidateChange} />
             </div>
             <div>
-              <Label htmlFor="messenger">Мессенджер</Label>
-              <Input id="messenger" value={candidateData.messenger} onChange={handleCandidateChange} />
+              <Label htmlFor="salaryMax">ЗП, макс</Label>
+              <Input id="salaryMax" type="number" value={candidateData.salaryMax} onChange={handleCandidateChange} />
             </div>
             <div>
               <Label htmlFor="location">Локация</Label>
@@ -154,6 +182,10 @@ function AssessmentPage() {
             <div>
               <Label htmlFor="phone">Телефон</Label>
               <Input id="phone" type="tel" value={candidateData.phone} onChange={handleCandidateChange} />
+            </div>
+            <div className="sm:col-span-2">
+              <Label htmlFor="messenger">Мессенджер</Label>
+              <Input id="messenger" value={candidateData.messenger} onChange={handleCandidateChange} />
             </div>
           </div>
         </CardContent>
@@ -165,20 +197,24 @@ function AssessmentPage() {
           <h2 className="text-xl font-semibold">Оценка навыков</h2>
         </CardHeader>
         <CardContent>
-          <Accordion type="single" collapsible className="w-full" onValueChange={handleAccordionOpen}>
-            {questions.map((question) => {
+          <Accordion type="single" collapsible className="w-full" onValueChange={handleAccordionOpen} value={openAccordion}>
+            {questions.map((question, index) => {
               const currentScore = assessmentData[question.id]?.score;
               const currentComment = assessmentData[question.id]?.comment;
-              const isItemOpen = question.id === 'open'; // A placeholder value
+              const isItemOpen = openAccordion === question.id;
               
               return (
                 <AccordionItem key={question.id} value={question.id}>
                   <AccordionTrigger className="flex justify-between items-center w-full">
                     <div className="flex-1 text-left">{question.text} ({question.weight} баллов)</div>
-                    {!isItemOpen && (
-                      <div className="ml-4 flex items-center space-x-2 text-sm text-gray-500 flex-shrink-0">
+                    {!isItemOpen && (currentScore > 0 || currentComment) && (
+                      <div className="ml-4 flex items-center p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-sm flex-shrink-0">
                         {currentScore > 0 && <span>Балл: {currentScore}</span>}
-                        {currentComment && <span>Комментарий: {formatComment(currentComment)}</span>}
+                        {currentComment && (
+                          <span className={`ml-2 ${currentScore > 0 ? 'border-l border-gray-300 pl-2' : ''}`}>
+                            Коммент: {formatComment(currentComment)}
+                          </span>
+                        )}
                       </div>
                     )}
                   </AccordionTrigger>
@@ -188,16 +224,9 @@ function AssessmentPage() {
                         <Label htmlFor={`score-${question.id}`}>Балл (0-10)</Label>
                         <div className="flex items-center">
                           <Button
-                            onClick={() => handleScoreChange(question.id, (assessmentData[question.id]?.score || 0) + 1)}
-                            variant="outline"
-                            className="rounded-r-none"
-                          >
-                            +
-                          </Button>
-                          <Button
                             onClick={() => handleScoreChange(question.id, (assessmentData[question.id]?.score || 0) - 1)}
                             variant="outline"
-                            className="rounded-none"
+                            className="rounded-r-none border-r-0 hover:bg-gray-100"
                           >
                             -
                           </Button>
@@ -209,17 +238,27 @@ function AssessmentPage() {
                             max="10"
                             value={assessmentData[question.id]?.score || ''}
                             onChange={(e) => handleScoreChange(question.id, e.target.value)}
-                            className="rounded-l-none"
+                            onKeyDown={(e) => handleScoreKeyDown(e, question.id)}
+                            className="rounded-none text-center"
                           />
+                          <Button
+                            onClick={() => handleScoreChange(question.id, (assessmentData[question.id]?.score || 0) + 1)}
+                            variant="outline"
+                            className="rounded-l-none border-l-0 hover:bg-gray-100"
+                          >
+                            +
+                          </Button>
                         </div>
                       </div>
                       <div>
                         <Label htmlFor={`comment-${question.id}`}>Комментарий</Label>
                         <Textarea
+                          ref={el => commentInputRefs.current[question.id] = el}
                           id={`comment-${question.id}`}
                           placeholder="Добавьте свои мысли"
                           value={assessmentData[question.id]?.comment || ''}
                           onChange={(e) => handleCommentChange(question.id, e.target.value)}
+                          onKeyDown={(e) => handleCommentKeyDown(e, question.id, index)}
                           rows="3"
                         />
                       </div>
