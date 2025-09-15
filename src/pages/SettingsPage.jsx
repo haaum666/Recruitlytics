@@ -4,7 +4,7 @@ import { Card, CardContent } from '../components/ui/card';
 import { Label } from '../components/ui/label';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
-import { Textarea } from '../components/ui/textarea'; // Добавил Textarea
+import { Textarea } from '../components/ui/textarea';
 import { questions as defaultQuestions } from '../config/questions.js';
 
 function SettingsPage() {
@@ -144,7 +144,7 @@ function SettingsPage() {
           <div className="space-y-4">
             <div>
               <Label htmlFor="positive-template">Положительный шаблон</Label>
-              <Textarea // Заменено на Textarea
+              <Textarea
                 id="positive-template"
                 value={emailTemplates.positive}
                 onChange={(e) => handleTemplateChange('positive', e.target.value)}
@@ -154,7 +154,7 @@ function SettingsPage() {
             </div>
             <div>
               <Label htmlFor="negative-template">Отрицательный шаблон</Label>
-              <Textarea // Заменено на Textarea
+              <Textarea
                 id="negative-template"
                 value={emailTemplates.negative}
                 onChange={(e) => handleTemplateChange('negative', e.target.value)}
