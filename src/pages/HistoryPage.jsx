@@ -16,7 +16,7 @@ import {
 import { Textarea } from '../components/ui/textarea';
 import html2pdf from 'html2pdf.js';
 
-function HistoryPage() {
+function HistoryPage({ onEdit }) {
   const [assessments, setAssessments] = useState([]);
   const [emailTemplates, setEmailTemplates] = useState({});
   const [openDialog, setOpenDialog] = useState(false);
@@ -104,11 +104,9 @@ ${motivation || '[Не заполнено]'}
         console.error('Не удалось скопировать текст: ', err);
       });
   };
-  
+
   const handleEditAssessment = (assessment) => {
-    console.log("Редактировать оценку:", assessment);
-    alert("Кнопка редактирования работает! Теперь мы можем передать данные на страницу оценки.");
-    // В будущем здесь будет логика для перехода на страницу редактирования
+    onEdit(assessment);
   };
 
   const handleDeleteAssessment = (id) => {
