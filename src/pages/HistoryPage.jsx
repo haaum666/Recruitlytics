@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getFromLocalStorage, saveToLocalStorage } from '../services/localStorageService.js';
-import { Card, CardContent, CardHeader } from '../components/ui/card';
+import { Card, CardContent } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '../components/ui/accordion';
 import { questions as defaultQuestions } from '../config/questions.js';
@@ -15,90 +15,78 @@ import {
 } from '../components/ui/dialog';
 import { Textarea } from '../components/ui/textarea';
 import html2pdf from 'html2pdf.js';
+import { positiveFeedbackTemplate, negativeFeedbackTemplate } from '../config/templates.js';
+import { Checkbox } from '../components/ui/checkbox';
+import { Label } from '../components/ui/label';
 
 function HistoryPage({ onEdit }) {
   const [assessments, setAssessments] = useState([]);
-  const [emailTemplates, setEmailTemplates] = useState({});
-  const [openDialog, setOpenDialog] = useState(false);
+  const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
+  const [openEmailDialog, setOpenEmailDialog] = useState(false);
+  const [openSelectionDialog, setOpenSelectionDialog] = useState(false);
   const [generatedEmail, setGeneratedEmail] = useState('');
-  const [openCoverLetterDialog, setOpenCoverLetterDialog] = useState(false);
-  const [generatedCoverLetter, setGeneratedCoverLetter] = useState('');
+  const [currentAssessment, setCurrentAssessment] = useState(null);
+  const [feedbackType, setFeedbackType] = useState(null);
+  const [selectedItems, setSelectedItems] = useState({ strengths: false, weaknesses: false, motivation: false });
   const [copyButtonText, setCopyButtonText] = useState('Копировать');
   const [currentQuestions, setCurrentQuestions] = useState([]);
 
   useEffect(() => {
     const savedAssessments = getFromLocalStorage('assessments', []);
     setAssessments(savedAssessments);
-    const savedTemplates = getFromLocalStorage('emailTemplates', { positive: '', negative: '' });
-    setEmailTemplates(savedTemplates);
     const savedQuestions = getFromLocalStorage('customQuestions', []);
     const combinedQuestions = [...defaultQuestions, ...savedQuestions];
     setCurrentQuestions(combinedQuestions);
   }, []);
 
-  const generateEmail = (assessment) => {
-    const { score, candidate } = assessment;
-    let template = '';
-    
-    if (score >= 5.0) {
-      template = emailTemplates.positive || 'Шаблон положительной оценки не найден.';
-    } else {
-      template = emailTemplates.negative || 'Шаблон отрицательной оценки не найден.';
+  const openFeedbackOptions = (assessment) => {
+    setCurrentAssessment(assessment);
+    setOpenFeedbackDialog(true);
+  };
+
+  const handleTypeSelection = (type) => {
+    setFeedbackType(type);
+    setOpenFeedbackDialog(false);
+    setOpenSelectionDialog(true);
+  };
+
+  const handleSelectionChange = (item) => {
+    setSelectedItems(prev => ({ ...prev, [item]: !prev[item] }));
+  };
+
+  const handleGenerateEmail = () => {
+    const { candidate, strengths, weaknesses, motivation } = currentAssessment;
+    let body = '';
+    const selectedPoints = [];
+
+    if (selectedItems.strengths && strengths) {
+      selectedPoints.push(`Сильные стороны: ${strengths}`);
+    }
+    if (selectedItems.weaknesses && weaknesses) {
+      selectedPoints.push(`Потенциальные зоны внимания: ${weaknesses}`);
+    }
+    if (selectedItems.motivation && motivation) {
+      selectedPoints.push(`Комментарий по мотивации: ${motivation}`);
     }
 
-    const finalEmail = template
-      .replace('[ИТОГОВЫЙ_БАЛЛ]', `Итоговый балл: ${parseFloat(score).toFixed(2)}`)
-      .replace('[ИМЯ_КАНДИДАТА]', `${candidate.firstName || ''} ${candidate.lastName || ''}`.trim());
+    body = selectedPoints.join('\n\n');
     
+    let templateFunction = feedbackType === 'positive' ? positiveFeedbackTemplate : negativeFeedbackTemplate;
+
+    const finalEmail = templateFunction(body)
+      .replace('[ИМЯ_КАНДИДАТА]', `${candidate.firstName || ''} ${candidate.lastName || ''}`.trim())
+      .replace('[ВАКАНСИЯ]', `${candidate.role || 'не указана'}`.trim());
+
     setGeneratedEmail(finalEmail);
-    setOpenDialog(true);
+    setOpenSelectionDialog(false);
+    setOpenEmailDialog(true);
   };
 
-  const generateCoverLetter = (assessment) => {
-    const { candidate, data, strengths, weaknesses, motivation } = assessment;
-    
-    const briefProfileNotes = currentQuestions.map(q => {
-      const item = data[q.id];
-      return item && item.comment ? `- ${item.comment}` : '';
-    }).filter(note => note).join('\n');
-
-    const template = `Вакансия: ${candidate.role || '[Название вакансии]'}
-Кандидат: ${candidate.firstName || ''} ${candidate.lastName || ''}
-Итоговый балл: ${assessment.score} (по 10-балльной взвешенной шкале)
-
----
-
-**Краткое описание методологии оценки:**
-Оценка кандидата производилась по взвешенной системе, где каждый критерий имеет свой "вес" в зависимости от его важности для вакансии. Итоговый балл является взвешенным средним от всех оценок и отражает процент соответствия кандидата всем ключевым требованиям, с учетом их приоритетности.
-
----
-
-Локация проживания: ${candidate.location || '[Город]'}
-Ожидания по зарплате: ${candidate.salary || 'не указано'}
-Телефон: ${candidate.phone || 'не указан'}
-Мессенджер: ${candidate.messenger || 'не указан'}
-
-Краткий профиль кандидата:
-${briefProfileNotes || '[Нет комментариев]'}.
-
-Сильные стороны кандидата:
-${strengths || '[Не заполнено]'}
-
-Потенциальные зоны внимания:
-${weaknesses || '[Не заполнено]'}
-
-Комментарий по мотивации:
-${motivation || '[Не заполнено]'}
-    `;
-    setGeneratedCoverLetter(template);
-    setOpenCoverLetterDialog(true);
-  };
-
-  const handleCopy = (text, setButtonText) => {
+  const handleCopy = (text) => {
     navigator.clipboard.writeText(text)
       .then(() => {
-        setButtonText('Скопировано!');
-        setTimeout(() => setButtonText('Копировать'), 2000);
+        setCopyButtonText('Скопировано!');
+        setTimeout(() => setCopyButtonText('Копировать'), 2000);
       })
       .catch(err => {
         console.error('Не удалось скопировать текст: ', err);
@@ -161,11 +149,11 @@ ${motivation || '[Не заполнено]'}
     `;
 
     const opt = {
-      margin:         1,
-      filename:       `отчет-оценка-${assessment.candidate.lastName || ''}-${new Date(assessment.date).toLocaleDateString()}.pdf`,
-      image:        { type: 'jpeg', quality: 0.98 },
-      html2canvas:  { scale: 2 },
-      jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
+      margin: 1,
+      filename: `отчет-оценка-${assessment.candidate.lastName || ''}-${new Date(assessment.date).toLocaleDateString()}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
     };
     
     html2pdf().from(element).set(opt).save();
@@ -245,8 +233,8 @@ ${motivation || '[Не заполнено]'}
                   <Button onClick={() => handleEditAssessment(assessment)}>
                     Редактировать
                   </Button>
-                  <Button onClick={() => generateEmail(assessment)}>
-                    Сгенерировать письмо
+                  <Button onClick={() => openFeedbackOptions(assessment)}>
+                    Обратная связь для кандидата
                   </Button>
                   <Button onClick={() => generatePDF(assessment)} variant="secondary">
                     Скачать PDF
@@ -266,7 +254,65 @@ ${motivation || '[Не заполнено]'}
         <p className="text-gray-500">Пока нет сохраненных оценок.</p>
       )}
 
-      <Dialog open={openDialog} onOpenChange={setOpenDialog}>
+      {/* Диалог выбора обратной связи */}
+      <Dialog open={openFeedbackDialog} onOpenChange={setOpenFeedbackDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Выберите тип обратной связи</DialogTitle>
+            <DialogDescription>
+              На основе вашего выбора будет предложен список пунктов.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center space-x-4 p-4">
+            <Button onClick={() => handleTypeSelection('positive')}>
+              Положительная
+            </Button>
+            <Button onClick={() => handleTypeSelection('negative')}>
+              Отрицательная
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Диалог выбора пунктов для письма */}
+      <Dialog open={openSelectionDialog} onOpenChange={setOpenSelectionDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Выберите пункты для письма</DialogTitle>
+            <DialogDescription>
+              Отметьте, какие комментарии вы хотите включить в письмо.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 p-4">
+            {currentAssessment?.strengths && (
+              <div className="flex items-center space-x-2">
+                <Checkbox id="strengths" checked={selectedItems.strengths} onCheckedChange={() => handleSelectionChange('strengths')} />
+                <Label htmlFor="strengths">Сильные стороны</Label>
+              </div>
+            )}
+            {currentAssessment?.weaknesses && (
+              <div className="flex items-center space-x-2">
+                <Checkbox id="weaknesses" checked={selectedItems.weaknesses} onCheckedChange={() => handleSelectionChange('weaknesses')} />
+                <Label htmlFor="weaknesses">Потенциальные зоны внимания</Label>
+              </div>
+            )}
+            {currentAssessment?.motivation && (
+              <div className="flex items-center space-x-2">
+                <Checkbox id="motivation" checked={selectedItems.motivation} onCheckedChange={() => handleSelectionChange('motivation')} />
+                <Label htmlFor="motivation">Комментарий по мотивации</Label>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button onClick={handleGenerateEmail} disabled={Object.values(selectedItems).every(item => !item)}>
+              Сформировать письмо
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Диалог сгенерированного письма */}
+      <Dialog open={openEmailDialog} onOpenChange={setOpenEmailDialog}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Сгенерированное письмо</DialogTitle>
@@ -280,34 +326,12 @@ ${motivation || '[Не заполнено]'}
             rows="10"
           />
           <DialogFooter>
-            <Button onClick={() => handleCopy(generatedEmail, setCopyButtonText)}>
+            <Button onClick={() => handleCopy(generatedEmail)}>
               {copyButtonText}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-      
-      <Dialog open={openCoverLetterDialog} onOpenChange={setOpenCoverLetterDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Сгенерированное сопроводительное письмо</DialogTitle>
-            <DialogDescription>
-              Текст, который можно использовать для отчета.
-            </DialogDescription>
-          </DialogHeader>
-          <Textarea
-            value={generatedCoverLetter}
-            readOnly
-            rows="15"
-          />
-          <DialogFooter>
-            <Button onClick={() => handleCopy(generatedCoverLetter, setCopyButtonText)}>
-              {copyButtonText}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
     </div>
   );
 }
