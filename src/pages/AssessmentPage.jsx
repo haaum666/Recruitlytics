@@ -163,7 +163,7 @@ function AssessmentPage() {
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
-      <h1 className="text-3xl font-bold">Новая оценка</h1>
+      <h1 className="text-3xl font-bold">Оценка компетенций специалиста</h1>
 
       {/* Блок: Данные кандидата */}
       <Card>
@@ -331,9 +331,8 @@ function AssessmentPage() {
         </CardContent>
       </Card>
 
-      <div className="flex justify-between items-center mt-6">
-        <div className="text-xl font-bold">Итоговый балл: {calculateTotalScore()}</div>
-        <Button onClick={saveAssessment} variant="default" className="w-1/2 md:w-auto">
+      <div className="flex justify-center items-center mt-6">
+        <Button onClick={saveAssessment} variant="secondary" className="w-1/2 md:w-auto">
           Сохранить результаты и завершить
         </Button>
       </div>
