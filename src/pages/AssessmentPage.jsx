@@ -8,7 +8,7 @@ import { Textarea } from '../components/ui/textarea';
 import { Button } from '../components/ui/button';
 import { questions as defaultQuestions } from '../config/questions.js';
 
-function AssessmentPage() {
+function AssessmentPage({ assessmentToEdit, setAssessmentToEdit }) {
   const [questions, setQuestions] = useState([]);
   const [assessmentData, setAssessmentData] = useState({});
   const [candidateData, setCandidateData] = useState({
@@ -22,7 +22,6 @@ function AssessmentPage() {
     role: '',
   });
 
-  // Новые состояния для дополнительных полей
   const [strengths, setStrengths] = useState('');
   const [weaknesses, setWeaknesses] = useState('');
   const [motivation, setMotivation] = useState('');
@@ -32,12 +31,10 @@ function AssessmentPage() {
   const scoreInputRefs = useRef({});
   const commentInputRefs = useRef({});
 
-  useEffect(() => {
-    // Corrected logic to fetch questions
+  const resetForm = () => {
     const savedCustomQuestions = getFromLocalStorage('customQuestions', []);
     const savedModifiedDefaultQuestions = getFromLocalStorage('modifiedDefaultQuestions', []);
 
-    // Merge default questions with their modified versions from localStorage
     const mergedQuestions = defaultQuestions.map(defaultQ => {
       const modified = savedModifiedDefaultQuestions.find(modQ => modQ.id === defaultQ.id);
       return modified || defaultQ;
@@ -55,7 +52,37 @@ function AssessmentPage() {
         return acc;
       }, {})
     );
+    setCandidateData({
+      firstName: '',
+      lastName: '',
+      age: '',
+      salary: '',
+      location: '',
+      phone: '',
+      messenger: '',
+      role: '',
+    });
+    setStrengths('');
+    setWeaknesses('');
+    setMotivation('');
+    setOpenAccordion('');
+  };
+
+  useEffect(() => {
+    resetForm();
   }, []);
+
+  useEffect(() => {
+    if (assessmentToEdit) {
+      setCandidateData(assessmentToEdit.candidate);
+      setAssessmentData(assessmentToEdit.data);
+      setStrengths(assessmentToEdit.strengths);
+      setWeaknesses(assessmentToEdit.weaknesses);
+      setMotivation(assessmentToEdit.motivation);
+    } else {
+      resetForm();
+    }
+  }, [assessmentToEdit]);
 
   const handleScoreChange = (id, value) => {
     const score = Number(value);
@@ -107,19 +134,28 @@ function AssessmentPage() {
   const saveAssessment = () => {
     const totalScore = calculateTotalScore();
     const newAssessment = {
-      id: Date.now(), // Добавлен уникальный ID
+      id: assessmentToEdit ? assessmentToEdit.id : Date.now(),
       date: new Date().toISOString(),
       score: totalScore,
       data: assessmentData,
       candidate: candidateData,
       strengths: strengths,
-      yweaknesses: weaknesses,
+      weaknesses: weaknesses,
       motivation: motivation,
     };
     
     const savedAssessments = getFromLocalStorage('assessments', []);
-    saveToLocalStorage('assessments', [...savedAssessments, newAssessment]);
-    alert('Оценка сохранена!');
+    if (assessmentToEdit) {
+      const updatedAssessments = savedAssessments.map(item =>
+        item.id === assessmentToEdit.id ? newAssessment : item
+      );
+      saveToLocalStorage('assessments', updatedAssessments);
+      alert('Оценка успешно обновлена!');
+    } else {
+      saveToLocalStorage('assessments', [...savedAssessments, newAssessment]);
+      alert('Оценка успешно сохранена!');
+    }
+    setAssessmentToEdit(null);
   };
 
   const handleAccordionOpen = (value) => {
@@ -164,9 +200,8 @@ function AssessmentPage() {
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
-      <h1 className="text-3xl font-bold">Оценка компетенций специалиста</h1>
+      <h1 className="text-3xl font-bold">{assessmentToEdit ? 'Редактирование оценки' : 'Оценка компетенций специалиста'}</h1>
 
-      {/* Блок: Данные кандидата */}
       <Card>
         <CardHeader>
           <h2 className="text-xl font-semibold">Данные кандидата</h2>
@@ -209,7 +244,6 @@ function AssessmentPage() {
         </CardContent>
       </Card>
       
-      {/* Блок: Оценка навыков */}
       <Card>
         <CardHeader>
           <h2 className="text-xl font-semibold">Оценка навыков</h2>
@@ -236,52 +270,52 @@ function AssessmentPage() {
                       </div>
                     )}
                   </AccordionTrigger>
-                    <AccordionContent>
-                      <div className="space-y-4">
-                        <div>
-                          <Label htmlFor={`score-${question.id}`}>Балл (0-10)</Label>
-                          <div className="flex items-center">
-                            <Button
-                              onClick={() => handleScoreChange(question.id, (assessmentData[question.id]?.score || 0) - 1)}
-                              variant="outline"
-                              className="rounded-r-none border-r-0 hover:bg-gray-100 w-10 h-10"
-                            >
-                              -
-                            </Button>
-                            <Button
-                              onClick={() => handleScoreChange(question.id, (assessmentData[question.id]?.score || 0) + 1)}
-                              variant="outline"
-                              className="rounded-none border-r-0 hover:bg-gray-100 w-10 h-10"
-                            >
-                              +
-                            </Button>
-                            <Input
-                              ref={el => scoreInputRefs.current[question.id] = el}
-                              id={`score-${question.id}`}
-                              type="number"
-                              min="0"
-                              max="10"
-                              value={assessmentData[question.id]?.score || ''}
-                              onChange={(e) => handleScoreChange(question.id, e.target.value)}
-                              onKeyDown={(e) => handleScoreKeyDown(e, question.id)}
-                              className="rounded-l-none text-center"
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <Label htmlFor={`comment-${question.id}`}>Комментарий</Label>
-                          <Textarea
-                            ref={el => commentInputRefs.current[question.id] = el}
-                            id={`comment-${question.id}`}
-                            placeholder="Добавьте свои мысли"
-                            value={assessmentData[question.id]?.comment || ''}
-                            onChange={(e) => handleCommentChange(question.id, e.target.value)}
-                            onKeyDown={(e) => handleCommentKeyDown(e, question.id, index)}
-                            rows="3"
+                  <AccordionContent>
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor={`score-${question.id}`}>Балл (0-10)</Label>
+                        <div className="flex items-center">
+                          <Button
+                            onClick={() => handleScoreChange(question.id, (assessmentData[question.id]?.score || 0) - 1)}
+                            variant="outline"
+                            className="rounded-r-none border-r-0 hover:bg-gray-100 w-10 h-10"
+                          >
+                            -
+                          </Button>
+                          <Button
+                            onClick={() => handleScoreChange(question.id, (assessmentData[question.id]?.score || 0) + 1)}
+                            variant="outline"
+                            className="rounded-none border-r-0 hover:bg-gray-100 w-10 h-10"
+                          >
+                            +
+                          </Button>
+                          <Input
+                            ref={el => scoreInputRefs.current[question.id] = el}
+                            id={`score-${question.id}`}
+                            type="number"
+                            min="0"
+                            max="10"
+                            value={assessmentData[question.id]?.score || ''}
+                            onChange={(e) => handleScoreChange(question.id, e.target.value)}
+                            onKeyDown={(e) => handleScoreKeyDown(e, question.id)}
+                            className="rounded-l-none text-center"
                           />
                         </div>
                       </div>
-                    </AccordionContent>
+                      <div>
+                        <Label htmlFor={`comment-${question.id}`}>Комментарий</Label>
+                        <Textarea
+                          ref={el => commentInputRefs.current[question.id] = el}
+                          id={`comment-${question.id}`}
+                          placeholder="Добавьте свои мысли"
+                          value={assessmentData[question.id]?.comment || ''}
+                          onChange={(e) => handleCommentChange(question.id, e.target.value)}
+                          onKeyDown={(e) => handleCommentKeyDown(e, question.id, index)}
+                          rows="3"
+                        />
+                      </div>
+                    </div>
+                  </AccordionContent>
                 </AccordionItem>
               );
             })}
@@ -293,7 +327,6 @@ function AssessmentPage() {
         <div className="text-xl font-bold">Итоговый балл: {calculateTotalScore()}</div>
       </div>
 
-      {/* Новый блок: Профиль кандидата */}
       <Card>
         <CardHeader>
           <h2 className="text-xl font-semibold">Профиль кандидата</h2>
@@ -334,7 +367,7 @@ function AssessmentPage() {
 
       <div className="flex justify-center items-center mt-6">
         <Button onClick={saveAssessment} className="w-1/2 md:w-auto bg-gray-200 text-gray-800 hover:bg-gray-300">
-          Сохранить результаты и завершить
+          {assessmentToEdit ? 'Обновить и завершить' : 'Сохранить и завершить'}
         </Button>
       </div>
     </div>
