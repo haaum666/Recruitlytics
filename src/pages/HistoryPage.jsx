@@ -104,6 +104,12 @@ ${motivation || '[Не заполнено]'}
         console.error('Не удалось скопировать текст: ', err);
       });
   };
+  
+  const handleEditAssessment = (assessment) => {
+    console.log("Редактировать оценку:", assessment);
+    alert("Кнопка редактирования работает! Теперь мы можем передать данные на страницу оценки.");
+    // В будущем здесь будет логика для перехода на страницу редактирования
+  };
 
   const handleDeleteAssessment = (id) => {
     const isConfirmed = window.confirm('Вы уверены, что хотите удалить эту оценку?');
@@ -238,6 +244,9 @@ ${motivation || '[Не заполнено]'}
                   )}
                 </div>
                 <div className="flex space-x-2 mt-4">
+                  <Button onClick={() => handleEditAssessment(assessment)}>
+                    Редактировать
+                  </Button>
                   <Button onClick={() => generateEmail(assessment)}>
                     Сгенерировать письмо
                   </Button>
