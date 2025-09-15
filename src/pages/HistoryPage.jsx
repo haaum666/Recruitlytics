@@ -36,17 +36,20 @@ function HistoryPage() {
     setCurrentQuestions(combinedQuestions);
   }, []);
 
-  const generateEmail = (score) => {
+  const generateEmail = (assessment) => {
+    const { score, candidate } = assessment;
     let template = '';
-    const scoreText = `Итоговый балл: ${score}`;
     
-    if (score >= 50) {
+    if (score >= 5.0) {
       template = emailTemplates.positive || 'Шаблон положительной оценки не найден.';
     } else {
       template = emailTemplates.negative || 'Шаблон отрицательной оценки не найден.';
     }
 
-    const finalEmail = template.replace('[ИТОГОВЫЙ_БАЛЛ]', scoreText);
+    const finalEmail = template
+      .replace('[ИТОГОВЫЙ_БАЛЛ]', `Итоговый балл: ${parseFloat(score).toFixed(2)}`)
+      .replace('[ИМЯ_КАНДИДАТА]', `${candidate.firstName || ''} ${candidate.lastName || ''}`.trim());
+    
     setGeneratedEmail(finalEmail);
     setOpenDialog(true);
   };
@@ -55,8 +58,8 @@ function HistoryPage() {
     const { candidate, data, strengths, weaknesses, motivation } = assessment;
     
     const briefProfileNotes = currentQuestions.map(q => {
-        const item = data[q.id];
-        return item && item.comment ? `- ${item.comment}` : '';
+      const item = data[q.id];
+      return item && item.comment ? `- ${item.comment}` : '';
     }).filter(note => note).join('\n');
 
     const template = `Вакансия: ${candidate.role || '[Название вакансии]'}
@@ -102,10 +105,10 @@ ${motivation || '[Не заполнено]'}
       });
   };
 
-  const handleDeleteAssessment = (index) => {
+  const handleDeleteAssessment = (id) => {
     const isConfirmed = window.confirm('Вы уверены, что хотите удалить эту оценку?');
     if (isConfirmed) {
-      const updatedAssessments = assessments.filter((_, i) => i !== index);
+      const updatedAssessments = assessments.filter(assessment => assessment.id !== id);
       saveToLocalStorage('assessments', updatedAssessments);
       setAssessments(updatedAssessments);
     }
@@ -169,8 +172,8 @@ ${motivation || '[Не заполнено]'}
       <h1 className="text-3xl font-bold mb-6">История оценок</h1>
       {assessments.length > 0 ? (
         <Accordion type="single" collapsible className="w-full space-y-4">
-          {assessments.map((assessment, index) => (
-            <AccordionItem key={index} value={`item-${index}`} className="border rounded-md shadow-sm">
+          {assessments.map((assessment) => (
+            <AccordionItem key={assessment.id} value={assessment.id}>
               <AccordionTrigger className="p-4">
                 <div className="flex justify-between items-center w-full">
                   <div className="flex flex-col text-left">
@@ -235,7 +238,7 @@ ${motivation || '[Не заполнено]'}
                   )}
                 </div>
                 <div className="flex space-x-2 mt-4">
-                  <Button onClick={() => generateEmail(assessment.score)}>
+                  <Button onClick={() => generateEmail(assessment)}>
                     Сгенерировать письмо
                   </Button>
                   <Button onClick={() => generatePDF(assessment)} variant="secondary">
@@ -244,7 +247,7 @@ ${motivation || '[Не заполнено]'}
                   <Button onClick={() => generateCoverLetter(assessment)} variant="outline">
                     Сопроводительное письмо
                   </Button>
-                  <Button onClick={() => handleDeleteAssessment(index)} variant="destructive">
+                  <Button onClick={() => handleDeleteAssessment(assessment.id)} variant="destructive">
                     Удалить оценку
                   </Button>
                 </div>
