@@ -52,7 +52,7 @@ function HistoryPage() {
   };
 
   const generateCoverLetter = (assessment) => {
-    const { candidate, data } = assessment;
+    const { candidate, data, strengths, weaknesses, motivation } = assessment;
     
     const briefProfileNotes = currentQuestions.map(q => {
         const item = data[q.id];
@@ -71,23 +71,21 @@ function HistoryPage() {
 ---
 
 Локация проживания: ${candidate.location || '[Город]'}
-Ожидания по зарплате: от ${candidate.salaryMin || '0'} до ${candidate.salaryMax || '0'} руб.
-Телефон: ${candidate.phone || ''}
-Мессенджер: ${candidate.messenger || ''}
+Ожидания по зарплате: ${candidate.salary || 'не указано'}
+Телефон: ${candidate.phone || 'не указан'}
+Мессенджер: ${candidate.messenger || 'не указан'}
 
 Краткий профиль кандидата:
 ${briefProfileNotes || '[Нет комментариев]'}.
 
 Сильные стороны кандидата:
-[Навык 1 — кратко]
-[Навык 2 — кратко]
-[Подход / опыт в команде / продуктовый фокус]
+${strengths || '[Не заполнено]'}
 
 Потенциальные зоны внимания:
-[Если есть что-то, что нужно учитывать — нестабильная работа, переезд, низкий опыт в чём-то, но компенсируемый другим.]
+${weaknesses || '[Не заполнено]'}
 
 Комментарий по мотивации:
-[Почему рассматривает вакансию, что ищет, какие задачи интересны.]
+${motivation || '[Не заполнено]'}
     `;
     setGeneratedCoverLetter(template);
     setOpenCoverLetterDialog(true);
@@ -122,11 +120,12 @@ ${briefProfileNotes || '[Нет комментариев]'}.
       <p class="mb-2"><strong>Позиция:</strong> ${assessment.candidate.role}</p>
       <p class="mb-2"><strong>Возраст:</strong> ${assessment.candidate.age || 'не указан'}</p>
       <p class="mb-2"><strong>Локация:</strong> ${assessment.candidate.location || 'не указана'}</p>
-      <p class="mb-2"><strong>ЗП:</strong> от ${assessment.candidate.salaryMin || '0'} до ${assessment.candidate.salaryMax || '0'} руб.</p>
+      <p class="mb-2"><strong>ЗП:</strong> ${assessment.candidate.salary || 'не указана'}</p>
       <p class="mb-2"><strong>Телефон:</strong> ${assessment.candidate.phone || 'не указан'}</p>
       <p class="mb-2"><strong>Мессенджер:</strong> ${assessment.candidate.messenger || 'не указан'}</p>
       <p class="mb-2"><strong>Дата оценки:</strong> ${new Date(assessment.date).toLocaleDateString()}</p>
       <p class="mb-4"><strong>Итоговый балл:</strong> ${assessment.score}</p>
+      
       <h2 class="text-2xl font-semibold mb-4">Детали оценки</h2>
       ${currentQuestions.map(q => {
         const assessmentItem = assessment.data[q.id] || {};
@@ -138,11 +137,25 @@ ${briefProfileNotes || '[Нет комментариев]'}.
           </div>
         `;
       }).join('')}
+      
+      <h2 class="text-2xl font-semibold mb-4">Профиль кандидата</h2>
+      <div class="mb-4 p-3 border rounded-md">
+        <p class="font-medium">Сильные стороны кандидата:</p>
+        <p class="text-sm text-gray-700 mt-1">${assessment.strengths || 'Не заполнено'}</p>
+      </div>
+      <div class="mb-4 p-3 border rounded-md">
+        <p class="font-medium">Потенциальные зоны внимания:</p>
+        <p class="text-sm text-gray-700 mt-1">${assessment.weaknesses || 'Не заполнено'}</p>
+      </div>
+      <div class="mb-4 p-3 border rounded-md">
+        <p class="font-medium">Комментарий по мотивации:</p>
+        <p class="text-sm text-gray-700 mt-1">${assessment.motivation || 'Не заполнено'}</p>
+      </div>
     `;
 
     const opt = {
-      margin:       1,
-      filename:     `отчет-оценка-${assessment.candidate.lastName || ''}-${new Date(assessment.date).toLocaleDateString()}.pdf`,
+      margin:         1,
+      filename:       `отчет-оценка-${assessment.candidate.lastName || ''}-${new Date(assessment.date).toLocaleDateString()}.pdf`,
       image:        { type: 'jpeg', quality: 0.98 },
       html2canvas:  { scale: 2 },
       jsPDF:        { unit: 'in', format: 'letter', orientation: 'portrait' }
@@ -174,11 +187,12 @@ ${briefProfileNotes || '[Нет комментариев]'}.
                   <p><strong>Позиция:</strong> {assessment.candidate.role}</p>
                   <p><strong>Возраст:</strong> {assessment.candidate.age || 'не указан'}</p>
                   <p><strong>Локация:</strong> {assessment.candidate.location || 'не указана'}</p>
-                  <p><strong>ЗП:</strong> от {assessment.candidate.salaryMin || '0'} до {assessment.candidate.salaryMax || '0'} руб.</p>
+                  <p><strong>ЗП:</strong> {assessment.candidate.salary || 'не указана'}</p>
                   <p><strong>Телефон:</strong> {assessment.candidate.phone || 'не указан'}</p>
                   <p><strong>Мессенджер:</strong> {assessment.candidate.messenger || 'не указан'}</p>
                 </div>
                 <div className="space-y-4 mb-4">
+                  <h3 className="font-bold text-lg">Детали оценки</h3>
                   {currentQuestions.map(question => {
                     const assessmentItem = assessment.data[question.id] || {};
                     return (
@@ -192,6 +206,33 @@ ${briefProfileNotes || '[Нет комментариев]'}.
                       </Card>
                     );
                   })}
+                </div>
+                <div className="space-y-4 mb-4">
+                  <h3 className="font-bold text-lg">Профиль кандидата</h3>
+                  {assessment.strengths && (
+                    <Card className="p-3">
+                      <CardContent className="p-0">
+                        <p className="font-medium">Сильные стороны:</p>
+                        <p className="text-sm text-gray-700 mt-1">{assessment.strengths}</p>
+                      </CardContent>
+                    </Card>
+                  )}
+                  {assessment.weaknesses && (
+                    <Card className="p-3">
+                      <CardContent className="p-0">
+                        <p className="font-medium">Потенциальные зоны внимания:</p>
+                        <p className="text-sm text-gray-700 mt-1">{assessment.weaknesses}</p>
+                      </CardContent>
+                    </Card>
+                  )}
+                  {assessment.motivation && (
+                    <Card className="p-3">
+                      <CardContent className="p-0">
+                        <p className="font-medium">Комментарий по мотивации:</p>
+                        <p className="text-sm text-gray-700 mt-1">{assessment.motivation}</p>
+                      </CardContent>
+                    </Card>
+                  )}
                 </div>
                 <div className="flex space-x-2 mt-4">
                   <Button onClick={() => generateEmail(assessment.score)}>
@@ -241,7 +282,7 @@ ${briefProfileNotes || '[Нет комментариев]'}.
           <DialogHeader>
             <DialogTitle>Сгенерированное сопроводительное письмо</DialogTitle>
             <DialogDescription>
-              Текст, который можно использовать для отчета. Части в скобках нужно заполнить вручную.
+              Текст, который можно использовать для отчета.
             </DialogDescription>
           </DialogHeader>
           <Textarea
