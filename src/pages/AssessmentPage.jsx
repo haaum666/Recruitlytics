@@ -332,7 +332,7 @@ function AssessmentPage() {
       </Card>
 
       <div className="flex justify-center items-center mt-6">
-        <Button onClick={saveAssessment} variant="secondary" className="w-1/2 md:w-auto">
+        <Button onClick={saveAssessment} className="w-1/2 md:w-auto bg-gray-200 text-gray-800 hover:bg-gray-300">
           Сохранить результаты и завершить
         </Button>
       </div>
