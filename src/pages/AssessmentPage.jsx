@@ -232,7 +232,7 @@ function AssessmentPage() {
                             Коммент: {formatComment(currentComment)}
                           </span>
                         )}
-                      </div>
+                    </div>
                     )}
                   </AccordionTrigger>
                   <AccordionContent>
@@ -281,8 +281,8 @@ function AssessmentPage() {
                       </div>
                     </div>
                   </AccordionContent>
-              </AccordionItem>
-            ))}
+                </AccordionItem>
+            })}
           </Accordion>
         </CardContent>
       </Card>
