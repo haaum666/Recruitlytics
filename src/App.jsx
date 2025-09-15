@@ -6,22 +6,35 @@ import SettingsPage from './pages/SettingsPage';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('assessment');
+  const [assessmentToEdit, setAssessmentToEdit] = useState(null);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    if (page !== 'assessment') {
+      setAssessmentToEdit(null);
+    }
+  };
+
+  const handleEditAssessment = (assessment) => {
+    setAssessmentToEdit(assessment);
+    setCurrentPage('assessment');
+  };
 
   const renderPage = () => {
     switch (currentPage) {
       case 'assessment':
-        return <AssessmentPage />;
+        return <AssessmentPage assessmentToEdit={assessmentToEdit} setAssessmentToEdit={setAssessmentToEdit} />;
       case 'history':
-        return <HistoryPage />;
+        return <HistoryPage onEdit={handleEditAssessment} />;
       case 'settings':
         return <SettingsPage />;
       default:
-        return <AssessmentPage />;
+        return <AssessmentPage assessmentToEdit={assessmentToEdit} setAssessmentToEdit={setAssessmentToEdit} />;
     }
   };
 
   return (
-    <Layout onPageChange={setCurrentPage}>
+    <Layout onPageChange={handlePageChange}>
       {renderPage()}
     </Layout>
   );
