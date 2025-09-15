@@ -286,19 +286,19 @@ function HistoryPage({ onEdit }) {
           <div className="space-y-4 p-4">
             {currentAssessment?.strengths && (
               <div className="flex items-center space-x-2">
-                <Checkbox id="strengths" checked={selectedItems.strengths} onCheckedChange={() => handleSelectionChange('strengths')} />
+                <Checkbox id="strengths" name="strengths" checked={selectedItems.strengths} onCheckedChange={() => handleSelectionChange('strengths')} />
                 <Label htmlFor="strengths">Сильные стороны</Label>
               </div>
             )}
             {currentAssessment?.weaknesses && (
               <div className="flex items-center space-x-2">
-                <Checkbox id="weaknesses" checked={selectedItems.weaknesses} onCheckedChange={() => handleSelectionChange('weaknesses')} />
+                <Checkbox id="weaknesses" name="weaknesses" checked={selectedItems.weaknesses} onCheckedChange={() => handleSelectionChange('weaknesses')} />
                 <Label htmlFor="weaknesses">Потенциальные зоны внимания</Label>
               </div>
             )}
             {currentAssessment?.motivation && (
               <div className="flex items-center space-x-2">
-                <Checkbox id="motivation" checked={selectedItems.motivation} onCheckedChange={() => handleSelectionChange('motivation')} />
+                <Checkbox id="motivation" name="motivation" checked={selectedItems.motivation} onCheckedChange={() => handleSelectionChange('motivation')} />
                 <Label htmlFor="motivation">Комментарий по мотивации</Label>
               </div>
             )}
