@@ -9,317 +9,329 @@ import { Button } from '../components/ui/button';
 import { questions as defaultQuestions } from '../config/questions.js';
 
 function AssessmentPage() {
-  const [questions, setQuestions] = useState([]);
-  const [assessmentData, setAssessmentData] = useState({});
-  const [candidateData, setCandidateData] = useState({
-    firstName: '',
-    lastName: '',
-    age: '',
-    salary: '',
-    location: '',
-    phone: '',
-    messenger: '',
-    role: '',
-  });
+  const [questions, setQuestions] = useState([]);
+  const [assessmentData, setAssessmentData] = useState({});
+  const [candidateData, setCandidateData] = useState({
+    firstName: '',
+    lastName: '',
+    age: '',
+    salary: '',
+    location: '',
+    phone: '',
+    messenger: '',
+    role: '',
+  });
 
-  // Новые состояния для дополнительных полей
-  const [strengths, setStrengths] = useState('');
-  const [weaknesses, setWeaknesses] = useState('');
-  const [motivation, setMotivation] = useState('');
+  // Новые состояния для дополнительных полей
+  const [strengths, setStrengths] = useState('');
+  const [weaknesses, setWeaknesses] = useState('');
+  const [motivation, setMotivation] = useState('');
 
-  const [openAccordion, setOpenAccordion] = useState('');
+  const [openAccordion, setOpenAccordion] = useState('');
 
-  const scoreInputRefs = useRef({});
-  const commentInputRefs = useRef({});
+  const scoreInputRefs = useRef({});
+  const commentInputRefs = useRef({});
 
-  useEffect(() => {
+  useEffect(() => {
+    // Corrected logic to fetch questions
     const savedCustomQuestions = getFromLocalStorage('customQuestions', []);
-    const combinedQuestions = [...defaultQuestions, ...savedCustomQuestions];
-    setQuestions(combinedQuestions);
-    setAssessmentData(
-      combinedQuestions.reduce((acc, q) => {
-        acc[q.id] = { score: 0, comment: '' };
-        return acc;
-      }, {})
-    );
-  }, []);
+    const savedModifiedDefaultQuestions = getFromLocalStorage('modifiedDefaultQuestions', []);
 
-  const handleScoreChange = (id, value) => {
-    const score = Number(value);
-    let validatedScore = score;
-    if (score > 10) {
-      validatedScore = 10;
-    } else if (score < 0) {
-      validatedScore = 0;
-    }
-    
-    setAssessmentData(prevData => ({
-      ...prevData,
-      [id]: { ...prevData[id], score: validatedScore },
-    }));
-  };
+    // Merge default questions with their modified versions from localStorage
+    const mergedQuestions = defaultQuestions.map(defaultQ => {
+        const modified = savedModifiedDefaultQuestions.find(modQ => modQ.id === defaultQ.id);
+        return modified || defaultQ;
+    });
 
-  const handleCommentChange = (id, comment) => {
-    setAssessmentData(prevData => ({
-      ...prevData,
-      [id]: { ...prevData[id], comment },
-    }));
-  };
+    const combinedQuestions = [
+        ...mergedQuestions,
+        ...savedCustomQuestions
+    ];
 
-  const handleCandidateChange = (e) => {
-    const { id, value } = e.target;
-    setCandidateData(prevData => ({
-      ...prevData,
-      [id]: value,
-    }));
-  };
+    setQuestions(combinedQuestions);
+    setAssessmentData(
+      combinedQuestions.reduce((acc, q) => {
+        acc[q.id] = { score: 0, comment: '' };
+        return acc;
+      }, {})
+    );
+  }, []);
 
-  const calculateTotalScore = () => {
-    const totalPossibleScore = questions.reduce((total, q) => total + q.weight * 10, 0);
-    const totalWeightedScore = questions.reduce((total, question) => {
-      const item = assessmentData[question.id] || {};
-      const score = item.score || 0;
-      return total + score * question.weight;
-    }, 0);
-    
-    if (totalPossibleScore === 0) {
-      return 0;
-    }
-    
-    const finalScore = (totalWeightedScore / totalPossibleScore) * 10;
-    
-    return finalScore.toFixed(2);
-  };
+  const handleScoreChange = (id, value) => {
+    const score = Number(value);
+    let validatedScore = score;
+    if (score > 10) {
+      validatedScore = 10;
+    } else if (score < 0) {
+      validatedScore = 0;
+    }
+    
+    setAssessmentData(prevData => ({
+      ...prevData,
+      [id]: { ...prevData[id], score: validatedScore },
+    }));
+  };
 
-  const saveAssessment = () => {
-    const totalScore = calculateTotalScore();
-    const newAssessment = {
-      date: new Date().toISOString(),
-      score: totalScore,
-      data: assessmentData,
-      candidate: candidateData,
-      strengths: strengths,
-      weaknesses: weaknesses,
-      motivation: motivation,
-    };
-    
-    const savedAssessments = getFromLocalStorage('assessments', []);
-    saveToLocalStorage('assessments', [...savedAssessments, newAssessment]);
-    alert('Оценка сохранена!');
-  };
+  const handleCommentChange = (id, comment) => {
+    setAssessmentData(prevData => ({
+      ...prevData,
+      [id]: { ...prevData[id], comment },
+    }));
+  };
 
-  const handleAccordionOpen = (value) => {
-    setOpenAccordion(value);
-    if (value && scoreInputRefs.current[value]) {
-      setTimeout(() => scoreInputRefs.current[value].focus(), 0);
-    }
-  };
+  const handleCandidateChange = (e) => {
+    const { id, value } = e.target;
+    setCandidateData(prevData => ({
+      ...prevData,
+      [id]: value,
+    }));
+  };
 
-  const handleScoreKeyDown = (e, questionId) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      const commentInput = commentInputRefs.current[questionId];
-      if (commentInput) {
-        commentInput.focus();
-      }
-    }
-  };
+  const calculateTotalScore = () => {
+    const totalPossibleScore = questions.reduce((total, q) => total + q.weight * 10, 0);
+    const totalWeightedScore = questions.reduce((total, question) => {
+      const item = assessmentData[question.id] || {};
+      const score = item.score || 0;
+      return total + score * question.weight;
+    }, 0);
+    
+    if (totalPossibleScore === 0) {
+      return 0;
+    }
+    
+    const finalScore = (totalWeightedScore / totalPossibleScore) * 10;
+    
+    return finalScore.toFixed(2);
+  };
 
-  const handleCommentKeyDown = (e, questionId, index) => {
-    if (e.key === 'Enter' && !e.ctrlKey) {
-      e.preventDefault();
-      const nextQuestionId = questions[index + 1]?.id;
-      if (nextQuestionId) {
-        setOpenAccordion(nextQuestionId);
-      } else {
-        setOpenAccordion('');
-      }
-    } else if (e.key === 'Enter' && e.ctrlKey) {
-      e.target.value += '\n';
-    }
-  };
+  const saveAssessment = () => {
+    const totalScore = calculateTotalScore();
+    const newAssessment = {
+      date: new Date().toISOString(),
+      score: totalScore,
+      data: assessmentData,
+      candidate: candidateData,
+      strengths: strengths,
+      weaknesses: weaknesses,
+      motivation: motivation,
+    };
+    
+    const savedAssessments = getFromLocalStorage('assessments', []);
+    saveToLocalStorage('assessments', [...savedAssessments, newAssessment]);
+    alert('Оценка сохранена!');
+  };
 
-  const formatComment = (comment) => {
-    if (!comment) return '';
-    const trimmedComment = comment.trim();
-    if (trimmedComment.length > 30) {
-      return `${trimmedComment.substring(0, 30)}...`;
-    }
-    return trimmedComment;
-  };
+  const handleAccordionOpen = (value) => {
+    setOpenAccordion(value);
+    if (value && scoreInputRefs.current[value]) {
+      setTimeout(() => scoreInputRefs.current[value].focus(), 0);
+    }
+  };
 
-  return (
-    <div className="p-6 max-w-4xl mx-auto space-y-6">
-      <h1 className="text-3xl font-bold">Новая оценка</h1>
+  const handleScoreKeyDown = (e, questionId) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const commentInput = commentInputRefs.current[questionId];
+      if (commentInput) {
+        commentInput.focus();
+      }
+    }
+  };
 
-      {/* Блок: Данные кандидата */}
-      <Card>
-        <CardHeader>
-          <h2 className="text-xl font-semibold">Данные кандидата</h2>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="firstName">Имя</Label>
-              <Input id="firstName" value={candidateData.firstName} onChange={handleCandidateChange} />
-            </div>
-            <div>
-              <Label htmlFor="lastName">Фамилия</Label>
-              <Input id="lastName" value={candidateData.lastName} onChange={handleCandidateChange} />
-            </div>
-            <div>
-              <Label htmlFor="phone">Телефон</Label>
-              <Input id="phone" type="tel" value={candidateData.phone} onChange={handleCandidateChange} />
-            </div>
-            <div>
-              <Label htmlFor="messenger">Мессенджер</Label>
-              <Input id="messenger" value={candidateData.messenger} onChange={handleCandidateChange} />
-            </div>
-            <div>
-              <Label htmlFor="age">Возраст</Label>
-              <Input id="age" type="number" value={candidateData.age} onChange={handleCandidateChange} />
-            </div>
-            <div>
-              <Label htmlFor="location">Локация</Label>
-              <Input id="location" value={candidateData.location} onChange={handleCandidateChange} />
-            </div>
-            <div>
-              <Label htmlFor="role">Позиция</Label>
-              <Input id="role" value={candidateData.role} onChange={handleCandidateChange} />
-            </div>
-            <div>
-              <Label htmlFor="salary">Ожидания ЗП (min-комфорт)</Label>
-              <Input id="salary" value={candidateData.salary} onChange={handleCandidateChange} placeholder="1000₽ - 1500₽" />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-      
-      {/* Блок: Оценка навыков */}
-      <Card>
-        <CardHeader>
-          <h2 className="text-xl font-semibold">Оценка навыков</h2>
-        </CardHeader>
-        <CardContent>
-          <Accordion type="single" collapsible className="w-full" onValueChange={handleAccordionOpen} value={openAccordion}>
-            {questions.map((question, index) => {
-              const currentScore = assessmentData[question.id]?.score;
-              const currentComment = assessmentData[question.id]?.comment;
-              const isItemOpen = openAccordion === question.id;
-              
-              return (
-                <AccordionItem key={question.id} value={question.id}>
-                  <AccordionTrigger className="flex justify-between items-center w-full p-4 rounded-lg transition-colors duration-200 cursor-pointer hover:bg-gray-100 no-underline hover:no-underline data-[state=open]:bg-gray-100">
-                    <div className="flex-1 text-left no-underline">{question.text} ({question.weight} баллов)</div>
-                    {!isItemOpen && (currentScore > 0 || currentComment) && (
-                      <div className="ml-4 flex items-center p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-sm flex-shrink-0">
-                        {currentScore > 0 && <span>Балл: {currentScore}</span>}
-                        {currentComment && (
-                          <span className={`ml-2 ${currentScore > 0 ? 'border-l border-gray-300 pl-2' : ''}`}>
-                            Коммент: {formatComment(currentComment)}
-                          </span>
-                        )}
-                      </div>
-                    )}
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor={`score-${question.id}`}>Балл (0-10)</Label>
-                        <div className="flex items-center">
-                          <Button
-                            onClick={() => handleScoreChange(question.id, (assessmentData[question.id]?.score || 0) - 1)}
-                            variant="outline"
-                            className="rounded-r-none border-r-0 hover:bg-gray-100 w-10 h-10"
-                          >
-                            -
-                          </Button>
-                          <Button
-                            onClick={() => handleScoreChange(question.id, (assessmentData[question.id]?.score || 0) + 1)}
-                            variant="outline"
-                            className="rounded-none border-r-0 hover:bg-gray-100 w-10 h-10"
-                          >
-                            +
-                          </Button>
-                          <Input
-                            ref={el => scoreInputRefs.current[question.id] = el}
-                            id={`score-${question.id}`}
-                            type="number"
-                            min="0"
-                            max="10"
-                            value={assessmentData[question.id]?.score || ''}
-                            onChange={(e) => handleScoreChange(question.id, e.target.value)}
-                            onKeyDown={(e) => handleScoreKeyDown(e, question.id)}
-                            className="rounded-l-none text-center"
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <Label htmlFor={`comment-${question.id}`}>Комментарий</Label>
-                        <Textarea
-                          ref={el => commentInputRefs.current[question.id] = el}
-                          id={`comment-${question.id}`}
-                          placeholder="Добавьте свои мысли"
-                          value={assessmentData[question.id]?.comment || ''}
-                          onChange={(e) => handleCommentChange(question.id, e.target.value)}
-                          onKeyDown={(e) => handleCommentKeyDown(e, question.id, index)}
-                          rows="3"
-                        />
-                      </div>
-                    </div>
-                  </AccordionContent>
-                </AccordionItem>
-              );
-            })}
-          </Accordion>
-        </CardContent>
-      </Card>
+  const handleCommentKeyDown = (e, questionId, index) => {
+    if (e.key === 'Enter' && !e.ctrlKey) {
+      e.preventDefault();
+      const nextQuestionId = questions[index + 1]?.id;
+      if (nextQuestionId) {
+        setOpenAccordion(nextQuestionId);
+      } else {
+        setOpenAccordion('');
+      }
+    } else if (e.key === 'Enter' && e.ctrlKey) {
+      e.target.value += '\n';
+    }
+  };
 
-      <div className="flex justify-between items-center mt-6">
-        <div className="text-xl font-bold">Итоговый балл: {calculateTotalScore()}</div>
-        <Button onClick={saveAssessment}>Сохранить оценку</Button>
-      </div>
+  const formatComment = (comment) => {
+    if (!comment) return '';
+    const trimmedComment = comment.trim();
+    if (trimmedComment.length > 30) {
+      return `${trimmedComment.substring(0, 30)}...`;
+    }
+    return trimmedComment;
+  };
 
-      {/* Новый блок: Профиль кандидата */}
-      <Card>
-        <CardHeader>
-          <h2 className="text-xl font-semibold">Профиль кандидата</h2>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="strengths">Сильные стороны кандидата</Label>
-            <Textarea
-              id="strengths"
-              value={strengths}
-              onChange={(e) => setStrengths(e.target.value)}
-              placeholder="Кратко опишите навыки и достижения, которые произвели наибольшее впечатление."
-              rows="4"
-            />
-          </div>
-          <div>
-            <Label htmlFor="weaknesses">Потенциальные зоны внимания</Label>
-            <Textarea
-              id="weaknesses"
-              value={weaknesses}
-              onChange={(e) => setWeaknesses(e.target.value)}
-              placeholder="Зафиксируйте моменты, которые требуют дополнительного обсуждения или могут быть рисками."
-              rows="4"
-            />
-          </div>
-          <div>
-            <Label htmlFor="motivation">Комментарий по мотивации</Label>
-            <Textarea
-              id="motivation"
-              value={motivation}
-              onChange={(e) => setMotivation(e.target.value)}
-              placeholder="Запишите, почему кандидат рассматривает нашу вакансию и что его мотивирует."
-              rows="4"
-            />
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
+  return (
+    <div className="p-6 max-w-4xl mx-auto space-y-6">
+      <h1 className="text-3xl font-bold">Новая оценка</h1>
+
+      {/* Блок: Данные кандидата */}
+      <Card>
+        <CardHeader>
+          <h2 className="text-xl font-semibold">Данные кандидата</h2>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="firstName">Имя</Label>
+              <Input id="firstName" value={candidateData.firstName} onChange={handleCandidateChange} />
+            </div>
+            <div>
+              <Label htmlFor="lastName">Фамилия</Label>
+              <Input id="lastName" value={candidateData.lastName} onChange={handleCandidateChange} />
+            </div>
+            <div>
+              <Label htmlFor="phone">Телефон</Label>
+              <Input id="phone" type="tel" value={candidateData.phone} onChange={handleCandidateChange} />
+            </div>
+            <div>
+              <Label htmlFor="messenger">Мессенджер</Label>
+              <Input id="messenger" value={candidateData.messenger} onChange={handleCandidateChange} />
+            </div>
+            <div>
+              <Label htmlFor="age">Возраст</Label>
+              <Input id="age" type="number" value={candidateData.age} onChange={handleCandidateChange} />
+            </div>
+            <div>
+              <Label htmlFor="location">Локация</Label>
+              <Input id="location" value={candidateData.location} onChange={handleCandidateChange} />
+            </div>
+            <div>
+              <Label htmlFor="role">Позиция</Label>
+              <Input id="role" value={candidateData.role} onChange={handleCandidateChange} />
+            </div>
+            <div>
+              <Label htmlFor="salary">Ожидания ЗП (min-комфорт)</Label>
+              <Input id="salary" value={candidateData.salary} onChange={handleCandidateChange} placeholder="1000₽ - 1500₽" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      {/* Блок: Оценка навыков */}
+      <Card>
+        <CardHeader>
+          <h2 className="text-xl font-semibold">Оценка навыков</h2>
+        </CardHeader>
+        <CardContent>
+          <Accordion type="single" collapsible className="w-full" onValueChange={handleAccordionOpen} value={openAccordion}>
+            {questions.map((question, index) => {
+              const currentScore = assessmentData[question.id]?.score;
+              const currentComment = assessmentData[question.id]?.comment;
+              const isItemOpen = openAccordion === question.id;
+              
+              return (
+                <AccordionItem key={question.id} value={question.id}>
+                  <AccordionTrigger className="flex justify-between items-center w-full p-4 rounded-lg transition-colors duration-200 cursor-pointer hover:bg-gray-100 no-underline hover:no-underline data-[state=open]:bg-gray-100">
+                    <div className="flex-1 text-left no-underline">{question.text} ({question.weight} баллов)</div>
+                    {!isItemOpen && (currentScore > 0 || currentComment) && (
+                      <div className="ml-4 flex items-center p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-sm flex-shrink-0">
+                        {currentScore > 0 && <span>Балл: {currentScore}</span>}
+                        {currentComment && (
+                          <span className={`ml-2 ${currentScore > 0 ? 'border-l border-gray-300 pl-2' : ''}`}>
+                            Коммент: {formatComment(currentComment)}
+                          </span>
+                        )}
+                      </div>
+                    )}
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="space-y-4">
+                      <div>
+                        <Label htmlFor={`score-${question.id}`}>Балл (0-10)</Label>
+                        <div className="flex items-center">
+                          <Button
+                            onClick={() => handleScoreChange(question.id, (assessmentData[question.id]?.score || 0) - 1)}
+                            variant="outline"
+                            className="rounded-r-none border-r-0 hover:bg-gray-100 w-10 h-10"
+                          >
+                            -
+                          </Button>
+                          <Button
+                            onClick={() => handleScoreChange(question.id, (assessmentData[question.id]?.score || 0) + 1)}
+                            variant="outline"
+                            className="rounded-none border-r-0 hover:bg-gray-100 w-10 h-10"
+                          >
+                            +
+                          </Button>
+                          <Input
+                            ref={el => scoreInputRefs.current[question.id] = el}
+                            id={`score-${question.id}`}
+                            type="number"
+                            min="0"
+                            max="10"
+                            value={assessmentData[question.id]?.score || ''}
+                            onChange={(e) => handleScoreChange(question.id, e.target.value)}
+                            onKeyDown={(e) => handleScoreKeyDown(e, question.id)}
+                            className="rounded-l-none text-center"
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <Label htmlFor={`comment-${question.id}`}>Комментарий</Label>
+                        <Textarea
+                          ref={el => commentInputRefs.current[question.id] = el}
+                          id={`comment-${question.id}`}
+                          placeholder="Добавьте свои мысли"
+                          value={assessmentData[question.id]?.comment || ''}
+                          onChange={(e) => handleCommentChange(question.id, e.target.value)}
+                          onKeyDown={(e) => handleCommentKeyDown(e, question.id, index)}
+                          rows="3"
+                        />
+                      </div>
+                    </div>
+                  </AccordionContent>
+              );
+            })}
+          </Accordion>
+        </CardContent>
+      </Card>
+
+      <div className="flex justify-between items-center mt-6">
+        <div className="text-xl font-bold">Итоговый балл: {calculateTotalScore()}</div>
+        <Button onClick={saveAssessment}>Сохранить оценку</Button>
+      </div>
+
+      {/* Новый блок: Профиль кандидата */}
+      <Card>
+        <CardHeader>
+          <h2 className="text-xl font-semibold">Профиль кандидата</h2>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="strengths">Сильные стороны кандидата</Label>
+            <Textarea
+              id="strengths"
+              value={strengths}
+              onChange={(e) => setStrengths(e.target.value)}
+              placeholder="Кратко опишите навыки и достижения, которые произвели наибольшее впечатление."
+              rows="4"
+            />
+          </div>
+          <div>
+            <Label htmlFor="weaknesses">Потенциальные зоны внимания</Label>
+            <Textarea
+              id="weaknesses"
+              value={weaknesses}
+              onChange={(e) => setWeaknesses(e.target.value)}
+              placeholder="Зафиксируйте моменты, которые требуют дополнительного обсуждения или могут быть рисками."
+              rows="4"
+            />
+          </div>
+          <div>
+            <Label htmlFor="motivation">Комментарий по мотивации</Label>
+            <Textarea
+              id="motivation"
+              value={motivation}
+              onChange={(e) => setMotivation(e.target.value)}
+              placeholder="Запишите, почему кандидат рассматривает нашу вакансию и что его мотивирует."
+              rows="4"
+            />
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
 }
 
 export default AssessmentPage;
