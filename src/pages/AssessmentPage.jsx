@@ -290,7 +290,6 @@ function AssessmentPage() {
 
       <div className="flex justify-between items-center mt-6">
         <div className="text-xl font-bold">Итоговый балл: {calculateTotalScore()}</div>
-        <Button onClick={saveAssessment}>Сохранить оценку</Button>
       </div>
 
       {/* Новый блок: Профиль кандидата */}
@@ -331,6 +330,13 @@ function AssessmentPage() {
           </div>
         </CardContent>
       </Card>
+
+      <div className="flex justify-between items-center mt-6">
+        <div className="text-xl font-bold">Итоговый балл: {calculateTotalScore()}</div>
+        <Button onClick={saveAssessment} variant="default" className="w-1/2 md:w-auto">
+          Сохранить результаты и завершить
+        </Button>
+      </div>
     </div>
   );
 }
