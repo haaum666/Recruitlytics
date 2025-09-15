@@ -281,8 +281,8 @@ function AssessmentPage() {
                       </div>
                     </div>
                   </AccordionContent>
-              );
-            })}
+              </AccordionItem>
+            ))}
           </Accordion>
         </CardContent>
       </Card>
