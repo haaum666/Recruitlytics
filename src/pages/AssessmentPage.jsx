@@ -107,12 +107,13 @@ function AssessmentPage() {
   const saveAssessment = () => {
     const totalScore = calculateTotalScore();
     const newAssessment = {
+      id: Date.now(), // Добавлен уникальный ID
       date: new Date().toISOString(),
       score: totalScore,
       data: assessmentData,
       candidate: candidateData,
       strengths: strengths,
-      weaknesses: weaknesses,
+      yweaknesses: weaknesses,
       motivation: motivation,
     };
     
@@ -235,52 +236,52 @@ function AssessmentPage() {
                       </div>
                     )}
                   </AccordionTrigger>
-                  <AccordionContent>
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor={`score-${question.id}`}>Балл (0-10)</Label>
-                        <div className="flex items-center">
-                          <Button
-                            onClick={() => handleScoreChange(question.id, (assessmentData[question.id]?.score || 0) - 1)}
-                            variant="outline"
-                            className="rounded-r-none border-r-0 hover:bg-gray-100 w-10 h-10"
-                          >
-                            -
-                          </Button>
-                          <Button
-                            onClick={() => handleScoreChange(question.id, (assessmentData[question.id]?.score || 0) + 1)}
-                            variant="outline"
-                            className="rounded-none border-r-0 hover:bg-gray-100 w-10 h-10"
-                          >
-                            +
-                          </Button>
-                          <Input
-                            ref={el => scoreInputRefs.current[question.id] = el}
-                            id={`score-${question.id}`}
-                            type="number"
-                            min="0"
-                            max="10"
-                            value={assessmentData[question.id]?.score || ''}
-                            onChange={(e) => handleScoreChange(question.id, e.target.value)}
-                            onKeyDown={(e) => handleScoreKeyDown(e, question.id)}
-                            className="rounded-l-none text-center"
+                    <AccordionContent>
+                      <div className="space-y-4">
+                        <div>
+                          <Label htmlFor={`score-${question.id}`}>Балл (0-10)</Label>
+                          <div className="flex items-center">
+                            <Button
+                              onClick={() => handleScoreChange(question.id, (assessmentData[question.id]?.score || 0) - 1)}
+                              variant="outline"
+                              className="rounded-r-none border-r-0 hover:bg-gray-100 w-10 h-10"
+                            >
+                              -
+                            </Button>
+                            <Button
+                              onClick={() => handleScoreChange(question.id, (assessmentData[question.id]?.score || 0) + 1)}
+                              variant="outline"
+                              className="rounded-none border-r-0 hover:bg-gray-100 w-10 h-10"
+                            >
+                              +
+                            </Button>
+                            <Input
+                              ref={el => scoreInputRefs.current[question.id] = el}
+                              id={`score-${question.id}`}
+                              type="number"
+                              min="0"
+                              max="10"
+                              value={assessmentData[question.id]?.score || ''}
+                              onChange={(e) => handleScoreChange(question.id, e.target.value)}
+                              onKeyDown={(e) => handleScoreKeyDown(e, question.id)}
+                              className="rounded-l-none text-center"
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <Label htmlFor={`comment-${question.id}`}>Комментарий</Label>
+                          <Textarea
+                            ref={el => commentInputRefs.current[question.id] = el}
+                            id={`comment-${question.id}`}
+                            placeholder="Добавьте свои мысли"
+                            value={assessmentData[question.id]?.comment || ''}
+                            onChange={(e) => handleCommentChange(question.id, e.target.value)}
+                            onKeyDown={(e) => handleCommentKeyDown(e, question.id, index)}
+                            rows="3"
                           />
                         </div>
                       </div>
-                      <div>
-                        <Label htmlFor={`comment-${question.id}`}>Комментарий</Label>
-                        <Textarea
-                          ref={el => commentInputRefs.current[question.id] = el}
-                          id={`comment-${question.id}`}
-                          placeholder="Добавьте свои мысли"
-                          value={assessmentData[question.id]?.comment || ''}
-                          onChange={(e) => handleCommentChange(question.id, e.target.value)}
-                          onKeyDown={(e) => handleCommentKeyDown(e, question.id, index)}
-                          rows="3"
-                        />
-                      </div>
-                    </div>
-                  </AccordionContent>
+                    </AccordionContent>
                 </AccordionItem>
               );
             })}
