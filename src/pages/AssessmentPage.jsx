@@ -21,14 +21,20 @@ function AssessmentPage() {
     messenger: '',
     role: '',
   });
+
+  // Новые состояния для дополнительных полей
+  const [strengths, setStrengths] = useState('');
+  const [weaknesses, setWeaknesses] = useState('');
+  const [motivation, setMotivation] = useState('');
+
   const [openAccordion, setOpenAccordion] = useState('');
 
   const scoreInputRefs = useRef({});
   const commentInputRefs = useRef({});
 
   useEffect(() => {
-    const savedQuestions = getFromLocalStorage('customQuestions', []);
-    const combinedQuestions = [...defaultQuestions, ...savedQuestions];
+    const savedCustomQuestions = getFromLocalStorage('customQuestions', []);
+    const combinedQuestions = [...defaultQuestions, ...savedCustomQuestions];
     setQuestions(combinedQuestions);
     setAssessmentData(
       combinedQuestions.reduce((acc, q) => {
@@ -92,6 +98,9 @@ function AssessmentPage() {
       score: totalScore,
       data: assessmentData,
       candidate: candidateData,
+      strengths: strengths,
+      weaknesses: weaknesses,
+      motivation: motivation,
     };
     
     const savedAssessments = getFromLocalStorage('assessments', []);
@@ -270,6 +279,45 @@ function AssessmentPage() {
         <div className="text-xl font-bold">Итоговый балл: {calculateTotalScore()}</div>
         <Button onClick={saveAssessment}>Сохранить оценку</Button>
       </div>
+
+      {/* Новый блок: Профиль кандидата */}
+      <Card>
+        <CardHeader>
+          <h2 className="text-xl font-semibold">Профиль кандидата</h2>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <Label htmlFor="strengths">Сильные стороны кандидата</Label>
+            <Textarea
+              id="strengths"
+              value={strengths}
+              onChange={(e) => setStrengths(e.target.value)}
+              placeholder="Кратко опишите навыки и достижения, которые произвели наибольшее впечатление."
+              rows="4"
+            />
+          </div>
+          <div>
+            <Label htmlFor="weaknesses">Потенциальные зоны внимания</Label>
+            <Textarea
+              id="weaknesses"
+              value={weaknesses}
+              onChange={(e) => setWeaknesses(e.target.value)}
+              placeholder="Зафиксируйте моменты, которые требуют дополнительного обсуждения или могут быть рисками."
+              rows="4"
+            />
+          </div>
+          <div>
+            <Label htmlFor="motivation">Комментарий по мотивации</Label>
+            <Textarea
+              id="motivation"
+              value={motivation}
+              onChange={(e) => setMotivation(e.target.value)}
+              placeholder="Запишите, почему кандидат рассматривает нашу вакансию и что его мотивирует."
+              rows="4"
+            />
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
