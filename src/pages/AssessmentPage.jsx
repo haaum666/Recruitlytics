@@ -143,7 +143,7 @@ function AssessmentPage({ assessmentToEdit, setAssessmentToEdit, onPageChange, s
       strengths: strengths,
       weaknesses: weaknesses,
       motivation: motivation,
-      questions: questions // Добавлено: сохраняем актуальный список вопросов
+      questions: questions
     };
     
     const savedAssessments = getFromLocalStorage('assessments', []);
@@ -206,45 +206,45 @@ function AssessmentPage({ assessmentToEdit, setAssessmentToEdit, onPageChange, s
 
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
-      <h1 className="text-3xl font-bold">{assessmentToEdit ? 'Редактирование оценки' : 'Оценка компетенций специалиста'}</h1>
+      <h1 className="text-3xl font-bold dark:text-white">{assessmentToEdit ? 'Редактирование оценки' : 'Оценка компетенций специалиста'}</h1>
 
       <Card>
         <CardHeader>
-          <h2 className="text-xl font-semibold">Данные кандидата</h2>
+          <h2 className="text-xl font-semibold dark:text-white">Данные кандидата</h2>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <Label htmlFor="firstName">Имя</Label>
-              <Input id="firstName" value={candidateData.firstName} onChange={handleCandidateChange} />
+              <Label htmlFor="firstName" className="dark:text-gray-400">Имя</Label>
+              <Input id="firstName" value={candidateData.firstName} onChange={handleCandidateChange} className="dark:bg-zinc-900 dark:border-zinc-700 dark:text-gray-200" />
             </div>
             <div>
-              <Label htmlFor="lastName">Фамилия</Label>
-              <Input id="lastName" value={candidateData.lastName} onChange={handleCandidateChange} />
+              <Label htmlFor="lastName" className="dark:text-gray-400">Фамилия</Label>
+              <Input id="lastName" value={candidateData.lastName} onChange={handleCandidateChange} className="dark:bg-zinc-900 dark:border-zinc-700 dark:text-gray-200" />
             </div>
             <div>
-              <Label htmlFor="phone">Телефон</Label>
-              <Input id="phone" type="tel" value={candidateData.phone} onChange={handleCandidateChange} />
+              <Label htmlFor="phone" className="dark:text-gray-400">Телефон</Label>
+              <Input id="phone" type="tel" value={candidateData.phone} onChange={handleCandidateChange} className="dark:bg-zinc-900 dark:border-zinc-700 dark:text-gray-200" />
             </div>
             <div>
-              <Label htmlFor="messenger">Мессенджер</Label>
-              <Input id="messenger" value={candidateData.messenger} onChange={handleCandidateChange} />
+              <Label htmlFor="messenger" className="dark:text-gray-400">Мессенджер</Label>
+              <Input id="messenger" value={candidateData.messenger} onChange={handleCandidateChange} className="dark:bg-zinc-900 dark:border-zinc-700 dark:text-gray-200" />
             </div>
             <div>
-              <Label htmlFor="age">Возраст</Label>
-              <Input id="age" type="number" value={candidateData.age} onChange={handleCandidateChange} />
+              <Label htmlFor="age" className="dark:text-gray-400">Возраст</Label>
+              <Input id="age" type="number" value={candidateData.age} onChange={handleCandidateChange} className="dark:bg-zinc-900 dark:border-zinc-700 dark:text-gray-200" />
             </div>
             <div>
-              <Label htmlFor="location">Локация</Label>
-              <Input id="location" value={candidateData.location} onChange={handleCandidateChange} />
+              <Label htmlFor="location" className="dark:text-gray-400">Локация</Label>
+              <Input id="location" value={candidateData.location} onChange={handleCandidateChange} className="dark:bg-zinc-900 dark:border-zinc-700 dark:text-gray-200" />
             </div>
             <div>
-              <Label htmlFor="role">Позиция</Label>
-              <Input id="role" value={candidateData.role} onChange={handleCandidateChange} />
+              <Label htmlFor="role" className="dark:text-gray-400">Позиция</Label>
+              <Input id="role" value={candidateData.role} onChange={handleCandidateChange} className="dark:bg-zinc-900 dark:border-zinc-700 dark:text-gray-200" />
             </div>
             <div>
-              <Label htmlFor="salary">Ожидания ЗП (min-комфорт)</Label>
-              <Input id="salary" value={candidateData.salary} onChange={handleCandidateChange} placeholder="1000₽ - 1500₽" />
+              <Label htmlFor="salary" className="dark:text-gray-400">Ожидания ЗП (min-комфорт)</Label>
+              <Input id="salary" value={candidateData.salary} onChange={handleCandidateChange} placeholder="1000₽ - 1500₽" className="dark:bg-zinc-900 dark:border-zinc-700 dark:text-gray-200" />
             </div>
           </div>
         </CardContent>
@@ -252,7 +252,7 @@ function AssessmentPage({ assessmentToEdit, setAssessmentToEdit, onPageChange, s
       
       <Card>
         <CardHeader>
-          <h2 className="text-xl font-semibold">Оценка навыков</h2>
+          <h2 className="text-xl font-semibold dark:text-white">Оценка навыков</h2>
         </CardHeader>
         <CardContent>
           <Accordion type="single" collapsible className="w-full" onValueChange={handleAccordionOpen} value={openAccordion}>
@@ -262,36 +262,36 @@ function AssessmentPage({ assessmentToEdit, setAssessmentToEdit, onPageChange, s
               const isItemOpen = openAccordion === question.id;
               
               return (
-                <AccordionItem key={question.id} value={question.id}>
-                  <AccordionTrigger className="flex justify-between items-center w-full p-4 rounded-lg transition-colors duration-200 cursor-pointer hover:bg-gray-100 no-underline hover:no-underline data-[state=open]:bg-gray-100">
+                <AccordionItem key={question.id} value={question.id} className="dark:bg-zinc-800 dark:text-gray-200">
+                  <AccordionTrigger className="flex justify-between items-center w-full p-4 rounded-lg transition-colors duration-200 cursor-pointer hover:bg-gray-100 no-underline hover:no-underline data-[state=open]:bg-gray-100 dark:hover:bg-zinc-700 dark:data-[state=open]:bg-zinc-700">
                     <div className="flex-1 text-left no-underline">{question.text} ({question.weight} баллов)</div>
                     {!isItemOpen && (currentScore > 0 || currentComment) && (
                       <div className="ml-4 flex items-center p-2 rounded-lg bg-gray-100 dark:bg-gray-800 text-sm flex-shrink-0">
                         {currentScore > 0 && <span>Балл: {currentScore}</span>}
                         {currentComment && (
-                          <span className={`ml-2 ${currentScore > 0 ? 'border-l border-gray-300 pl-2' : ''}`}>
+                          <span className={`ml-2 ${currentScore > 0 ? 'border-l border-gray-300 dark:border-zinc-600 pl-2' : ''}`}>
                             Коммент: {formatComment(currentComment)}
                           </span>
                         )}
                       </div>
                     )}
                   </AccordionTrigger>
-                  <AccordionContent>
-                    <div className="space-y-4">
+                  <AccordionContent className="dark:border-zinc-700">
+                    <div className="space-y-4 p-4">
                       <div>
-                        <Label htmlFor={`score-${question.id}`}>Балл (0-10)</Label>
+                        <Label htmlFor={`score-${question.id}`} className="dark:text-gray-400">Балл (0-10)</Label>
                         <div className="flex items-center">
                           <Button
                             onClick={() => handleScoreChange(question.id, (assessmentData[question.id]?.score || 0) - 1)}
                             variant="outline"
-                            className="rounded-r-none border-r-0 hover:bg-gray-100 w-10 h-10"
+                            className="rounded-r-none border-r-0 hover:bg-gray-100 w-10 h-10 dark:bg-zinc-900 dark:border-zinc-700 dark:text-gray-200 dark:hover:bg-zinc-800"
                           >
                             -
                           </Button>
                           <Button
                             onClick={() => handleScoreChange(question.id, (assessmentData[question.id]?.score || 0) + 1)}
                             variant="outline"
-                            className="rounded-none border-r-0 hover:bg-gray-100 w-10 h-10"
+                            className="rounded-none border-r-0 hover:bg-gray-100 w-10 h-10 dark:bg-zinc-900 dark:border-zinc-700 dark:text-gray-200 dark:hover:bg-zinc-800"
                           >
                             +
                           </Button>
@@ -304,12 +304,12 @@ function AssessmentPage({ assessmentToEdit, setAssessmentToEdit, onPageChange, s
                             value={assessmentData[question.id]?.score || ''}
                             onChange={(e) => handleScoreChange(question.id, e.target.value)}
                             onKeyDown={(e) => handleScoreKeyDown(e, question.id)}
-                            className="rounded-l-none text-center"
+                            className="rounded-l-none text-center dark:bg-zinc-900 dark:border-zinc-700 dark:text-gray-200"
                           />
                         </div>
                       </div>
                       <div>
-                        <Label htmlFor={`comment-${question.id}`}>Комментарий</Label>
+                        <Label htmlFor={`comment-${question.id}`} className="dark:text-gray-400">Комментарий</Label>
                         <Textarea
                           ref={el => commentInputRefs.current[question.id] = el}
                           id={`comment-${question.id}`}
@@ -318,6 +318,7 @@ function AssessmentPage({ assessmentToEdit, setAssessmentToEdit, onPageChange, s
                           onChange={(e) => handleCommentChange(question.id, e.target.value)}
                           onKeyDown={(e) => handleCommentKeyDown(e, question.id, index)}
                           rows="3"
+                          className="dark:bg-zinc-900 dark:border-zinc-700 dark:text-gray-200"
                         />
                       </div>
                     </div>
@@ -330,63 +331,66 @@ function AssessmentPage({ assessmentToEdit, setAssessmentToEdit, onPageChange, s
       </Card>
 
       <div className="flex justify-between items-center mt-6">
-        <div className="text-xl font-bold">Итоговый балл: {calculateTotalScore()}</div>
+        <div className="text-xl font-bold dark:text-white">Итоговый балл: {calculateTotalScore()}</div>
       </div>
 
       <Card>
         <CardHeader>
-          <h2 className="text-xl font-semibold">Профиль кандидата</h2>
+          <h2 className="text-xl font-semibold dark:text-white">Профиль кандидата</h2>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <Label htmlFor="strengths">Сильные стороны кандидата</Label>
+            <Label htmlFor="strengths" className="dark:text-gray-400">Сильные стороны кандидата</Label>
             <Textarea
               id="strengths"
               value={strengths}
               onChange={(e) => setStrengths(e.target.value)}
               placeholder="Кратко опишите навыки и достижения, которые произвели наибольшее впечатление."
               rows="4"
+              className="dark:bg-zinc-900 dark:border-zinc-700 dark:text-gray-200"
             />
           </div>
           <div>
-            <Label htmlFor="weaknesses">Потенциальные зоны внимания</Label>
+            <Label htmlFor="weaknesses" className="dark:text-gray-400">Потенциальные зоны внимания</Label>
             <Textarea
               id="weaknesses"
               value={weaknesses}
               onChange={(e) => setWeaknesses(e.target.value)}
               placeholder="Зафиксируйте моменты, которые требуют дополнительного обсуждения или могут быть рисками."
               rows="4"
+              className="dark:bg-zinc-900 dark:border-zinc-700 dark:text-gray-200"
             />
           </div>
           <div>
-            <Label htmlFor="motivation">Комментарий по мотивации</Label>
+            <Label htmlFor="motivation" className="dark:text-gray-400">Комментарий по мотивации</Label>
             <Textarea
               id="motivation"
               value={motivation}
               onChange={(e) => setMotivation(e.target.value)}
               placeholder="Запишите, почему кандидат рассматривает нашу вакансию и что его мотивирует."
               rows="4"
+              className="dark:bg-zinc-900 dark:border-zinc-700 dark:text-gray-200"
             />
           </div>
         </CardContent>
       </Card>
 
       <div className="flex justify-center items-center mt-6">
-        <Button onClick={saveAssessment} ref={saveButtonRef} className="w-1/2 md:w-auto bg-gray-200 text-gray-800 hover:bg-gray-300">
+        <Button onClick={saveAssessment} ref={saveButtonRef} className="w-1/2 md:w-auto bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-zinc-700 dark:text-gray-200 dark:hover:bg-zinc-600">
           {assessmentToEdit ? 'Обновить и завершить' : 'Сохранить и завершить'}
         </Button>
       </div>
 
       <Dialog open={isSaveSuccess} onOpenChange={setIsSaveSuccess}>
-        <DialogContent>
+        <DialogContent className="dark:bg-zinc-800 dark:text-white">
           <DialogHeader>
             <DialogTitle>Сохранение завершено</DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="dark:text-gray-400">
               {assessmentToEdit ? 'Оценка успешно обновлена!' : 'Оценка успешно сохранена!'}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button onClick={handleOkClick}>ОК</Button>
+            <Button onClick={handleOkClick} className="dark:bg-zinc-700 dark:text-gray-200 dark:hover:bg-zinc-600">ОК</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
