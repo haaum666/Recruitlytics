@@ -31,7 +31,6 @@ function AssessmentPage({ assessmentToEdit, setAssessmentToEdit, onPageChange, s
   const scoreInputRefs = useRef({});
   const commentInputRefs = useRef({});
   const [isSaveSuccess, setIsSaveSuccess] = useState(false);
-  const [isRedirecting, setIsRedirecting] = useState(false);
 
   const resetForm = () => {
     const savedCustomQuestions = getFromLocalStorage('customQuestions', []);
@@ -85,16 +84,6 @@ function AssessmentPage({ assessmentToEdit, setAssessmentToEdit, onPageChange, s
       resetForm();
     }
   }, [assessmentToEdit]);
-
-  useEffect(() => {
-    if (isSaveSuccess) {
-      setTimeout(() => {
-        setIsSaveSuccess(false);
-        setAssessmentToEdit(null);
-        onPageChange('history');
-      }, 1000); // 1-секундная задержка
-    }
-  }, [isSaveSuccess, onPageChange, setAssessmentToEdit]);
 
   const handleScoreChange = (id, value) => {
     const score = Number(value);
@@ -167,6 +156,11 @@ function AssessmentPage({ assessmentToEdit, setAssessmentToEdit, onPageChange, s
     }
     
     setIsSaveSuccess(true);
+  };
+  
+  const handleOkClick = () => {
+    setIsSaveSuccess(false);
+    onPageChange('history');
   };
 
   const handleAccordionOpen = (value) => {
@@ -391,7 +385,7 @@ function AssessmentPage({ assessmentToEdit, setAssessmentToEdit, onPageChange, s
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button onClick={() => setIsSaveSuccess(false)}>ОК</Button>
+            <Button onClick={handleOkClick}>ОК</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
