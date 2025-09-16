@@ -31,10 +31,24 @@ function HistoryPage({ onEdit }) {
   const [feedbackType, setFeedbackType] = useState(null);
   const [selectedItems, setSelectedItems] = useState({ strengths: false, weaknesses: false, motivation: false });
   const [copyButtonText, setCopyButtonText] = useState('Копировать');
-  
+  const [questions, setQuestions] = useState([]);
+
   useEffect(() => {
     const savedAssessments = getFromLocalStorage('assessments', []);
     setAssessments(savedAssessments);
+    const savedCustomQuestions = getFromLocalStorage('customQuestions', []);
+    const savedModifiedDefaultQuestions = getFromLocalStorage('modifiedDefaultQuestions', []);
+
+    const mergedQuestions = defaultQuestions.map(defaultQ => {
+      const modified = savedModifiedDefaultQuestions.find(modQ => modQ.id === defaultQ.id);
+      return modified || defaultQ;
+    });
+
+    const combinedQuestions = [
+      ...mergedQuestions,
+      ...savedCustomQuestions
+    ];
+    setQuestions(combinedQuestions);
   }, []);
 
   const openFeedbackOptions = (assessment) => {
@@ -107,6 +121,7 @@ function HistoryPage({ onEdit }) {
   };
 
   const generatePDF = (assessment) => {
+    const questionsToUse = assessment.questions || questions;
     const element = document.createElement('div');
     element.className = 'p-6 bg-white';
     element.innerHTML = `
@@ -122,7 +137,7 @@ function HistoryPage({ onEdit }) {
       <p class="mb-4"><strong>Итоговый балл:</strong> ${assessment.score}</p>
       
       <h2 class="text-2xl font-semibold mb-4">Детали оценки</h2>
-      ${(assessment.questions || defaultQuestions).map(q => {
+      ${questionsToUse.map(q => {
         const assessmentItem = assessment.data[q.id] || {};
         return `
           <div class="mb-4 p-3 border rounded-md">
@@ -162,8 +177,9 @@ function HistoryPage({ onEdit }) {
   const generateCoverLetter = (assessment) => {
     setCurrentAssessment(assessment);
     const { candidate, score, strengths, weaknesses, motivation, data } = assessment;
+    const questionsToUse = assessment.questions || questions;
 
-    const detailedAssessment = (assessment.questions || defaultQuestions).map(question => {
+    const detailedAssessment = questionsToUse.map(question => {
         const assessmentItem = data[question.id] || {};
         const scoreValue = assessmentItem.score || 'Не указан';
         const commentValue = assessmentItem.comment || 'Нет комментария';
@@ -194,8 +210,9 @@ function HistoryPage({ onEdit }) {
   
   const downloadCoverLetterPDF = (assessment) => {
     const { candidate, score, strengths, weaknesses, motivation, data } = assessment;
-    
-    const detailedAssessment = (assessment.questions || defaultQuestions).map(question => {
+    const questionsToUse = assessment.questions || questions;
+
+    const detailedAssessment = questionsToUse.map(question => {
         const assessmentItem = data[question.id] || {};
         const scoreValue = assessmentItem.score || 'Не указан';
         const commentValue = assessmentItem.comment || 'Нет комментария';
@@ -260,94 +277,96 @@ function HistoryPage({ onEdit }) {
     html2pdf().from(element).set(opt).save();
   };
 
-
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
       <h1 className="text-3xl font-bold mb-6">История оценок</h1>
       {assessments.length > 0 ? (
         <Accordion type="single" collapsible className="w-full space-y-4">
-          {assessments.map((assessment) => (
-            <AccordionItem key={assessment.id} value={assessment.id}>
-              <AccordionTrigger className="p-4">
-                <div className="flex justify-between items-center w-full">
-                  <div className="flex flex-col text-left">
-                    <span className="font-semibold">{assessment.candidate.firstName} {assessment.candidate.lastName}</span>
-                    <span className="text-sm text-gray-600">Дата: {new Date(assessment.date).toLocaleDateString()}</span>
+          {assessments.map((assessment) => {
+            const questionsToUse = assessment.questions || questions;
+            return (
+              <AccordionItem key={assessment.id} value={assessment.id}>
+                <AccordionTrigger className="p-4">
+                  <div className="flex justify-between items-center w-full">
+                    <div className="flex flex-col text-left">
+                      <span className="font-semibold">{assessment.candidate.firstName} {assessment.candidate.lastName}</span>
+                      <span className="text-sm text-gray-600">Дата: {new Date(assessment.date).toLocaleDateString()}</span>
+                    </div>
+                    <Badge variant="secondary" className="text-base py-1 px-4">
+                      Балл: {parseFloat(assessment.score).toFixed(2)}
+                    </Badge>
                   </div>
-                  <Badge variant="secondary" className="text-base py-1 px-4">
-                    Балл: {parseFloat(assessment.score).toFixed(2)}
-                  </Badge>
-                </div>
-              </AccordionTrigger>
-              <AccordionContent className="p-4 bg-gray-50 border-t">
-                <div className="mb-4 space-y-2">
-                  <p><strong>Позиция:</strong> {assessment.candidate.role}</p>
-                  <p><strong>Возраст:</strong> {assessment.candidate.age || 'не указан'}</p>
-                  <p><strong>Локация:</strong> {assessment.candidate.location || 'не указана'}</p>
-                  <p><strong>ЗП:</strong> {assessment.candidate.salary || 'не указана'}</p>
-                  <p><strong>Телефон:</strong> {assessment.candidate.phone || 'не указан'}</p>
-                  <p><strong>Мессенджер:</strong> {assessment.candidate.messenger || 'не указан'}</p>
-                </div>
-                <div className="space-y-4 mb-4">
-                  <h3 className="font-bold text-lg">Детали оценки</h3>
-                  {(assessment.questions || defaultQuestions).map(question => {
-                    const assessmentItem = assessment.data[question.id] || {};
-                    return (
-                      <Card key={question.id} className="p-3">
+                </AccordionTrigger>
+                <AccordionContent className="p-4 bg-gray-50 border-t">
+                  <div className="mb-4 space-y-2">
+                    <p><strong>Позиция:</strong> {assessment.candidate.role}</p>
+                    <p><strong>Возраст:</strong> {assessment.candidate.age || 'не указан'}</p>
+                    <p><strong>Локация:</strong> {assessment.candidate.location || 'не указана'}</p>
+                    <p><strong>ЗП:</strong> {assessment.candidate.salary || 'не указана'}</p>
+                    <p><strong>Телефон:</strong> {assessment.candidate.phone || 'не указан'}</p>
+                    <p><strong>Мессенджер:</strong> {assessment.candidate.messenger || 'не указан'}</p>
+                  </div>
+                  <div className="space-y-4 mb-4">
+                    <h3 className="font-bold text-lg">Детали оценки</h3>
+                    {questionsToUse.map(question => {
+                      const assessmentItem = assessment.data[question.id] || {};
+                      return (
+                        <Card key={question.id} className="p-3">
+                          <CardContent className="p-0">
+                            <p className="font-medium">{question.text}</p>
+                            <p className="text-sm text-gray-700 mt-1">
+                              Балл: {assessmentItem.score || 'Не указан'} / Комментарий: {assessmentItem.comment || 'Нет'}
+                            </p>
+                          </CardContent>
+                        </Card>
+                      );
+                    })}
+                  </div>
+                  <div className="space-y-4 mb-4">
+                    <h3 className="font-bold text-lg">Профиль кандидата</h3>
+                    {assessment.strengths && (
+                      <Card className="p-3">
                         <CardContent className="p-0">
-                          <p className="font-medium">{question.text}</p>
-                          <p className="text-sm text-gray-700 mt-1">
-                            Балл: {assessmentItem.score || 'Не указан'} / Комментарий: {assessmentItem.comment || 'Нет'}
-                          </p>
+                          <p className="font-medium">Сильные стороны:</p>
+                          <p className="text-sm text-gray-700 mt-1">{assessment.strengths}</p>
                         </CardContent>
                       </Card>
-                    );
-                  })}
-                </div>
-                <div className="space-y-4 mb-4">
-                  <h3 className="font-bold text-lg">Профиль кандидата</h3>
-                  {assessment.strengths && (
-                    <Card className="p-3">
-                      <CardContent className="p-0">
-                        <p className="font-medium">Сильные стороны:</p>
-                        <p className="text-sm text-gray-700 mt-1">{assessment.strengths}</p>
-                      </CardContent>
-                    </Card>
-                  )}
-                  {assessment.weaknesses && (
-                    <Card className="p-3">
-                      <CardContent className="p-0">
-                        <p className="font-medium">Потенциальные зоны внимания:</p>
-                        <p className="text-sm text-gray-700 mt-1">{assessment.weaknesses}</p>
-                      </CardContent>
-                    </Card>
-                  )}
-                  {assessment.motivation && (
-                    <Card className="p-3">
-                      <CardContent className="p-0">
-                        <p className="font-medium">Комментарий по мотивации:</p>
-                        <p className="text-sm text-gray-700 mt-1">{assessment.motivation}</p>
-                      </CardContent>
-                    </Card>
-                  )}
-                </div>
-                <div className="flex space-x-2 mt-4">
-                  <Button onClick={() => handleEditAssessment(assessment)}>
-                    Редактировать
-                  </Button>
-                  <Button onClick={() => openFeedbackOptions(assessment)}>
-                    Обратная связь для кандидата
-                  </Button>
-                  <Button onClick={() => generateCoverLetter(assessment)} variant="outline">
-                    Сопроводительное письмо
-                  </Button>
-                  <Button onClick={() => handleDeleteAssessment(assessment.id)} variant="destructive">
-                    Удалить оценку
-                  </Button>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          ))}
+                    )}
+                    {assessment.weaknesses && (
+                      <Card className="p-3">
+                        <CardContent className="p-0">
+                          <p className="font-medium">Потенциальные зоны внимания:</p>
+                          <p className="text-sm text-gray-700 mt-1">{assessment.weaknesses}</p>
+                        </CardContent>
+                      </Card>
+                    )}
+                    {assessment.motivation && (
+                      <Card className="p-3">
+                        <CardContent className="p-0">
+                          <p className="font-medium">Комментарий по мотивации:</p>
+                          <p className="text-sm text-gray-700 mt-1">{assessment.motivation}</p>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                  <div className="flex space-x-2 mt-4">
+                    <Button onClick={() => handleEditAssessment(assessment)}>
+                      Редактировать
+                    </Button>
+                    <Button onClick={() => openFeedbackOptions(assessment)}>
+                      Обратная связь для кандидата
+                    </Button>
+                    <Button onClick={() => generateCoverLetter(assessment)} variant="outline">
+                      Сопроводительное письмо
+                    </Button>
+                    <Button onClick={() => handleDeleteAssessment(assessment.id)} variant="destructive">
+                      Удалить оценку
+                    </Button>
+                  </div>
+                </AccordionContent>
+              </AccordionItem>
+            );
+          })}
         </Accordion>
       ) : (
         <p className="text-gray-500">Пока нет сохраненных оценок.</p>
