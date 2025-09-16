@@ -24,6 +24,8 @@ function HistoryPage({ onEdit }) {
   const [openFeedbackDialog, setOpenFeedbackDialog] = useState(false);
   const [openEmailDialog, setOpenEmailDialog] = useState(false);
   const [openSelectionDialog, setOpenSelectionDialog] = useState(false);
+  const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
+  const [openCoverLetterDialog, setOpenCoverLetterDialog] = useState(false);
   const [generatedEmail, setGeneratedEmail] = useState('');
   const [currentAssessment, setCurrentAssessment] = useState(null);
   const [feedbackType, setFeedbackType] = useState(null);
@@ -97,12 +99,15 @@ function HistoryPage({ onEdit }) {
   };
 
   const handleDeleteAssessment = (id) => {
-    const isConfirmed = window.confirm('Вы уверены, что хотите удалить эту оценку?');
-    if (isConfirmed) {
-      const updatedAssessments = assessments.filter(assessment => assessment.id !== id);
-      saveToLocalStorage('assessments', updatedAssessments);
-      setAssessments(updatedAssessments);
-    }
+    setCurrentAssessment({ id });
+    setOpenDeleteDialog(true);
+  };
+  
+  const confirmDelete = () => {
+    const updatedAssessments = assessments.filter(assessment => assessment.id !== currentAssessment.id);
+    saveToLocalStorage('assessments', updatedAssessments);
+    setAssessments(updatedAssessments);
+    setOpenDeleteDialog(false);
   };
 
   const generatePDF = (assessment) => {
@@ -159,7 +164,7 @@ function HistoryPage({ onEdit }) {
   };
   
   const generateCoverLetter = () => {
-    alert("Функция 'Сопроводительное письмо' пока не реализована.");
+    setOpenCoverLetterDialog(true);
   };
 
   return (
@@ -332,6 +337,37 @@ function HistoryPage({ onEdit }) {
             <Button onClick={() => handleCopy(generatedEmail)}>
               {copyButtonText}
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* Диалог подтверждения удаления */}
+      <Dialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Подтверждение удаления</DialogTitle>
+            <DialogDescription>
+              Вы уверены, что хотите удалить эту оценку?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => setOpenDeleteDialog(false)} variant="outline">Отмена</Button>
+            <Button onClick={confirmDelete} variant="destructive">Удалить</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Диалог для сопроводительного письма */}
+      <Dialog open={openCoverLetterDialog} onOpenChange={setOpenCoverLetterDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Сопроводительное письмо</DialogTitle>
+            <DialogDescription>
+              Функция 'Сопроводительное письмо' пока не реализована.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => setOpenCoverLetterDialog(false)}>ОК</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
