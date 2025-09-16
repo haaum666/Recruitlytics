@@ -19,8 +19,14 @@ function Sidebar({ onPageChange, currentPage }) {
           p-2 
           border-2 
           border-gray-500 
-          shadow-[2px_2px_0_0_#808080] 
-          font-mono
+          shadow-[4px_4px_0_0_#4a5568] 
+          font-mono 
+          transition-all 
+          duration-100 
+          ease-in-out 
+          active:translate-x-1 
+          active:translate-y-1 
+          active:shadow-none
         ">
           Recruitlytics
         </h2>
