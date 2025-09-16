@@ -288,35 +288,35 @@ function HistoryPage({ onEdit }) {
           {assessments.map((assessment) => {
             const questionsToUse = getAssessmentQuestions(assessment);
             return (
-              <AccordionItem key={assessment.id} value={assessment.id}>
-                <AccordionTrigger className="p-4">
+              <AccordionItem key={assessment.id} value={assessment.id} className="border rounded-lg shadow-sm dark:border-zinc-700 dark:bg-zinc-800">
+                <AccordionTrigger className="p-4 rounded-t-lg transition-colors duration-200 hover:bg-gray-100 data-[state=open]:bg-gray-100 dark:bg-zinc-800 dark:text-gray-200 dark:hover:bg-zinc-700 dark:data-[state=open]:bg-zinc-700">
                   <div className="flex justify-between items-center w-full">
                     <div className="flex flex-col text-left">
                       <span className="font-semibold dark:text-white">{assessment.candidate.firstName} {assessment.candidate.lastName}</span>
                       <span className="text-sm text-gray-600 dark:text-gray-400">Дата: {new Date(assessment.date).toLocaleDateString()}</span>
                     </div>
-                    <Badge variant="secondary" className="text-base py-1 px-4">
+                    <Badge variant="secondary" className="text-base py-1 px-4 dark:bg-zinc-700 dark:text-gray-200">
                       Балл: {parseFloat(assessment.score).toFixed(2)}
                     </Badge>
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="p-4 bg-gray-50 border-t dark:bg-zinc-800 dark:border-zinc-700 dark:text-gray-200">
                   <div className="mb-4 space-y-2">
-                    <p><strong>Позиция:</strong> {assessment.candidate.role}</p>
-                    <p><strong>Возраст:</strong> {assessment.candidate.age || 'не указан'}</p>
-                    <p><strong>Локация:</strong> {assessment.candidate.location || 'не указана'}</p>
-                    <p><strong>ЗП:</strong> {assessment.candidate.salary || 'не указана'}</p>
-                    <p><strong>Телефон:</strong> {assessment.candidate.phone || 'не указан'}</p>
-                    <p><strong>Мессенджер:</strong> {assessment.candidate.messenger || 'не указан'}</p>
+                    <p className="dark:text-gray-200"><strong>Позиция:</strong> {assessment.candidate.role}</p>
+                    <p className="dark:text-gray-200"><strong>Возраст:</strong> {assessment.candidate.age || 'не указан'}</p>
+                    <p className="dark:text-gray-200"><strong>Локация:</strong> {assessment.candidate.location || 'не указана'}</p>
+                    <p className="dark:text-gray-200"><strong>ЗП:</strong> {assessment.candidate.salary || 'не указана'}</p>
+                    <p className="dark:text-gray-200"><strong>Телефон:</strong> {assessment.candidate.phone || 'не указан'}</p>
+                    <p className="dark:text-gray-200"><strong>Мессенджер:</strong> {assessment.candidate.messenger || 'не указан'}</p>
                   </div>
                   <div className="space-y-4 mb-4">
                     <h3 className="font-bold text-lg dark:text-white">Детали оценки</h3>
                     {questionsToUse.map(question => {
                       const assessmentItem = assessment.data[question.id] || {};
                       return (
-                        <Card key={question.id} className="p-3">
+                        <Card key={question.id} className="p-3 dark:bg-zinc-800 dark:border-zinc-700">
                           <CardContent className="p-0">
-                            <p className="font-medium">{question.text}</p>
+                            <p className="font-medium dark:text-white">{question.text}</p>
                             <p className="text-sm text-gray-700 mt-1 dark:text-gray-400">
                               Балл: {assessmentItem.score || 'Не указан'} / Комментарий: {assessmentItem.comment || 'Нет'}
                             </p>
@@ -328,38 +328,38 @@ function HistoryPage({ onEdit }) {
                   <div className="space-y-4 mb-4">
                     <h3 className="font-bold text-lg dark:text-white">Профиль кандидата</h3>
                     {assessment.strengths && (
-                      <Card className="p-3">
+                      <Card className="p-3 dark:bg-zinc-800 dark:border-zinc-700">
                         <CardContent className="p-0">
-                          <p className="font-medium">Сильные стороны:</p>
+                          <p className="font-medium dark:text-white">Сильные стороны:</p>
                           <p className="text-sm text-gray-700 mt-1 dark:text-gray-400">{assessment.strengths}</p>
                         </CardContent>
                       </Card>
                     )}
                     {assessment.weaknesses && (
-                      <Card className="p-3">
+                      <Card className="p-3 dark:bg-zinc-800 dark:border-zinc-700">
                         <CardContent className="p-0">
-                          <p className="font-medium">Потенциальные зоны внимания:</p>
+                          <p className="font-medium dark:text-white">Потенциальные зоны внимания:</p>
                           <p className="text-sm text-gray-700 mt-1 dark:text-gray-400">{assessment.weaknesses}</p>
                         </CardContent>
                       </Card>
                     )}
                     {assessment.motivation && (
-                      <Card className="p-3">
+                      <Card className="p-3 dark:bg-zinc-800 dark:border-zinc-700">
                         <CardContent className="p-0">
-                          <p className="font-medium">Комментарий по мотивации:</p>
+                          <p className="font-medium dark:text-white">Комментарий по мотивации:</p>
                           <p className="text-sm text-gray-700 mt-1 dark:text-gray-400">{assessment.motivation}</p>
                         </CardContent>
                       </Card>
                     )}
                   </div>
-                  <div className="flex space-x-2 mt-4">
-                    <Button onClick={() => handleEditAssessment(assessment)}>
+                  <div className="flex flex-wrap gap-2 mt-4">
+                    <Button onClick={() => handleEditAssessment(assessment)} className="dark:bg-zinc-700 dark:text-gray-200 dark:hover:bg-zinc-600">
                       Редактировать
                     </Button>
-                    <Button onClick={() => openFeedbackOptions(assessment)}>
+                    <Button onClick={() => openFeedbackOptions(assessment)} className="dark:bg-zinc-700 dark:text-gray-200 dark:hover:bg-zinc-600">
                       Обратная связь для кандидата
                     </Button>
-                    <Button onClick={() => generateCoverLetter(assessment)} variant="outline">
+                    <Button onClick={() => generateCoverLetter(assessment)} variant="outline" className="dark:bg-zinc-700 dark:text-gray-200 dark:hover:bg-zinc-600 dark:border-zinc-600">
                       Сопроводительное письмо
                     </Button>
                     <Button onClick={() => handleDeleteAssessment(assessment.id)} variant="destructive">
@@ -385,10 +385,10 @@ function HistoryPage({ onEdit }) {
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-center space-x-4 p-4">
-            <Button onClick={() => handleTypeSelection('positive')}>
+            <Button onClick={() => handleTypeSelection('positive')} className="dark:bg-zinc-700 dark:text-gray-200 dark:hover:bg-zinc-600">
               Положительная
             </Button>
-            <Button onClick={() => handleTypeSelection('negative')}>
+            <Button onClick={() => handleTypeSelection('negative')} className="dark:bg-zinc-700 dark:text-gray-200 dark:hover:bg-zinc-600">
               Отрицательная
             </Button>
           </div>
@@ -407,25 +407,25 @@ function HistoryPage({ onEdit }) {
           <div className="space-y-4 p-4">
             {currentAssessment?.strengths && (
               <div className="flex items-center space-x-2">
-                <Checkbox id="strengths" name="strengths" checked={selectedItems.strengths} onCheckedChange={() => handleSelectionChange('strengths')} />
+                <Checkbox id="strengths" name="strengths" checked={selectedItems.strengths} onCheckedChange={() => handleSelectionChange('strengths')} className="dark:border-zinc-700 data-[state=checked]:dark:bg-zinc-600 data-[state=checked]:dark:text-gray-200" />
                 <Label htmlFor="strengths" className="dark:text-gray-300">Сильные стороны</Label>
               </div>
             )}
             {currentAssessment?.weaknesses && (
               <div className="flex items-center space-x-2">
-                <Checkbox id="weaknesses" name="weaknesses" checked={selectedItems.weaknesses} onCheckedChange={() => handleSelectionChange('weaknesses')} />
+                <Checkbox id="weaknesses" name="weaknesses" checked={selectedItems.weaknesses} onCheckedChange={() => handleSelectionChange('weaknesses')} className="dark:border-zinc-700 data-[state=checked]:dark:bg-zinc-600 data-[state=checked]:dark:text-gray-200" />
                 <Label htmlFor="weaknesses" className="dark:text-gray-300">Потенциальные зоны внимания</Label>
               </div>
             )}
             {currentAssessment?.motivation && (
               <div className="flex items-center space-x-2">
-                <Checkbox id="motivation" name="motivation" checked={selectedItems.motivation} onCheckedChange={() => handleSelectionChange('motivation')} />
+                <Checkbox id="motivation" name="motivation" checked={selectedItems.motivation} onCheckedChange={() => handleSelectionChange('motivation')} className="dark:border-zinc-700 data-[state=checked]:dark:bg-zinc-600 data-[state=checked]:dark:text-gray-200" />
                 <Label htmlFor="motivation" className="dark:text-gray-300">Комментарий по мотивации</Label>
               </div>
             )}
           </div>
           <DialogFooter>
-            <Button onClick={handleGenerateEmail} disabled={Object.values(selectedItems).every(item => !item)}>
+            <Button onClick={handleGenerateEmail} disabled={Object.values(selectedItems).every(item => !item)} className="dark:bg-zinc-700 dark:text-gray-200 dark:hover:bg-zinc-600">
               Сформировать письмо
             </Button>
           </DialogFooter>
@@ -448,7 +448,7 @@ function HistoryPage({ onEdit }) {
             className="dark:bg-zinc-900 dark:text-gray-200 dark:border-zinc-700"
           />
           <DialogFooter>
-            <Button onClick={() => handleCopy(generatedEmail)}>
+            <Button onClick={() => handleCopy(generatedEmail)} className="dark:bg-zinc-700 dark:text-gray-200 dark:hover:bg-zinc-600">
               {copyButtonText}
             </Button>
           </DialogFooter>
@@ -459,45 +459,4 @@ function HistoryPage({ onEdit }) {
       <Dialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
         <DialogContent className="dark:bg-zinc-800 dark:text-gray-200">
           <DialogHeader>
-            <DialogTitle className="dark:text-white">Подтверждение удаления</DialogTitle>
-            <DialogDescription className="dark:text-gray-400">
-              Вы уверены, что хотите удалить эту оценку?
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button onClick={() => setOpenDeleteDialog(false)} variant="outline">Отмена</Button>
-            <Button onClick={confirmDelete} variant="destructive">Удалить</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Диалог для сопроводительного письма */}
-      <Dialog open={openCoverLetterDialog} onOpenChange={setOpenCoverLetterDialog}>
-        <DialogContent className="dark:bg-zinc-800 dark:text-gray-200">
-          <DialogHeader>
-            <DialogTitle className="dark:text-white">Сопроводительное письмо</DialogTitle>
-            <DialogDescription className="dark:text-gray-400">
-              Текст сопроводительного письма.
-            </DialogDescription>
-          </DialogHeader>
-          <Textarea
-            value={generatedCoverLetter}
-            readOnly
-            rows="10"
-            className="dark:bg-zinc-900 dark:text-gray-200 dark:border-zinc-700"
-          />
-          <DialogFooter>
-            <Button onClick={() => downloadCoverLetterPDF(currentAssessment)} variant="secondary">
-              Скачать PDF
-            </Button>
-            <Button onClick={() => handleCopy(generatedCoverLetter)}>
-              {copyButtonText}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
-
-export default HistoryPage;
+            <DialogTitle className="dark:text-white">Подтверждение удаления</Dialog
