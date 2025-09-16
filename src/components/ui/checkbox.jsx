@@ -9,9 +9,9 @@ const Checkbox = React.forwardRef(({ className, checked, onCheckedChange, ...pro
     ref={ref}
     onClick={() => onCheckedChange && onCheckedChange(!checked)}
     className={cn(
-      "peer h-4 w-4 shrink-0 rounded-sm border border-primary shadow focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground",
+      "peer h-4 w-4 shrink-0 border-2 border-gray-300 shadow-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-gray-400 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-gray-300 data-[state=checked]:text-gray-800",
       className,
-      checked ? "bg-primary text-primary-foreground" : "bg-white"
+      checked ? "bg-gray-300 text-gray-800" : "bg-white"
     )}
     data-state={checked ? "checked" : "unchecked"}
     {...props}
