@@ -31,15 +31,10 @@ function HistoryPage({ onEdit }) {
   const [feedbackType, setFeedbackType] = useState(null);
   const [selectedItems, setSelectedItems] = useState({ strengths: false, weaknesses: false, motivation: false });
   const [copyButtonText, setCopyButtonText] = useState('Копировать');
-  const [currentQuestions, setCurrentQuestions] = useState([]);
-  const [generatedCoverLetter, setGeneratedCoverLetter] = useState('');
-
+  
   useEffect(() => {
     const savedAssessments = getFromLocalStorage('assessments', []);
     setAssessments(savedAssessments);
-    const savedQuestions = getFromLocalStorage('customQuestions', []);
-    const combinedQuestions = [...defaultQuestions, ...savedQuestions];
-    setCurrentQuestions(combinedQuestions);
   }, []);
 
   const openFeedbackOptions = (assessment) => {
@@ -127,7 +122,7 @@ function HistoryPage({ onEdit }) {
       <p class="mb-4"><strong>Итоговый балл:</strong> ${assessment.score}</p>
       
       <h2 class="text-2xl font-semibold mb-4">Детали оценки</h2>
-      ${currentQuestions.map(q => {
+      ${(assessment.questions || defaultQuestions).map(q => {
         const assessmentItem = assessment.data[q.id] || {};
         return `
           <div class="mb-4 p-3 border rounded-md">
@@ -168,7 +163,7 @@ function HistoryPage({ onEdit }) {
     setCurrentAssessment(assessment);
     const { candidate, score, strengths, weaknesses, motivation, data } = assessment;
 
-    const detailedAssessment = currentQuestions.map(question => {
+    const detailedAssessment = (assessment.questions || defaultQuestions).map(question => {
         const assessmentItem = data[question.id] || {};
         const scoreValue = assessmentItem.score || 'Не указан';
         const commentValue = assessmentItem.comment || 'Нет комментария';
@@ -200,7 +195,7 @@ function HistoryPage({ onEdit }) {
   const downloadCoverLetterPDF = (assessment) => {
     const { candidate, score, strengths, weaknesses, motivation, data } = assessment;
     
-    const detailedAssessment = currentQuestions.map(question => {
+    const detailedAssessment = (assessment.questions || defaultQuestions).map(question => {
         const assessmentItem = data[question.id] || {};
         const scoreValue = assessmentItem.score || 'Не указан';
         const commentValue = assessmentItem.comment || 'Нет комментария';
@@ -295,7 +290,7 @@ function HistoryPage({ onEdit }) {
                 </div>
                 <div className="space-y-4 mb-4">
                   <h3 className="font-bold text-lg">Детали оценки</h3>
-                  {currentQuestions.map(question => {
+                  {(assessment.questions || defaultQuestions).map(question => {
                     const assessmentItem = assessment.data[question.id] || {};
                     return (
                       <Card key={question.id} className="p-3">
