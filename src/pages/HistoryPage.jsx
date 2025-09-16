@@ -56,20 +56,19 @@ function HistoryPage({ onEdit }) {
 
   const handleGenerateEmail = () => {
     const { candidate, strengths, weaknesses, motivation } = currentAssessment;
-    let body = '';
-    const selectedPoints = [];
+    const feedbackParts = [];
 
     if (selectedItems.strengths && strengths) {
-      selectedPoints.push(`Сильные стороны: ${strengths}`);
+      feedbackParts.push(`Особенно хотели бы отметить: ${strengths}`);
     }
     if (selectedItems.weaknesses && weaknesses) {
-      selectedPoints.push(`Потенциальные зоны внимания: ${weaknesses}`);
+      feedbackParts.push(`Мы также обратили внимание на: ${weaknesses}`);
     }
     if (selectedItems.motivation && motivation) {
-      selectedPoints.push(`Комментарий по мотивации: ${motivation}`);
+      feedbackParts.push(`Что касается мотивации кандидата: ${motivation}`);
     }
 
-    body = selectedPoints.join('\n\n');
+    const body = feedbackParts.join('\n\n');
     
     let templateFunction = feedbackType === 'positive' ? positiveFeedbackTemplate : negativeFeedbackTemplate;
 
