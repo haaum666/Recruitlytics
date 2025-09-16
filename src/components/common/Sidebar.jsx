@@ -11,7 +11,18 @@ function Sidebar({ onPageChange, currentPage }) {
   return (
     <aside className="w-64 bg-white border-r flex flex-col items-center">
       <div className="py-6 mb-4">
-        <h2 className="text-xl font-bold text-center">Recruitlytics</h2>
+        <h2 className="
+          text-2xl 
+          font-extrabold 
+          text-black 
+          bg-gray-200 
+          p-2 
+          border-2 
+          border-gray-500 
+          shadow-[2px_2px_0_0_#808080]
+        ">
+          Recruitlytics
+        </h2>
       </div>
       <nav className="space-y-2 w-full px-4">
         {navItems.map((item) => (
