@@ -459,4 +459,45 @@ function HistoryPage({ onEdit }) {
       <Dialog open={openDeleteDialog} onOpenChange={setOpenDeleteDialog}>
         <DialogContent className="dark:bg-zinc-800 dark:text-gray-200">
           <DialogHeader>
-            <DialogTitle className="dark:text-white">Подтверждение удаления</Dialog
+            <DialogTitle className="dark:text-white">Подтверждение удаления</DialogTitle>
+            <DialogDescription className="dark:text-gray-400">
+              Вы уверены, что хотите удалить эту оценку?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => setOpenDeleteDialog(false)} variant="outline">Отмена</Button>
+            <Button onClick={confirmDelete} variant="destructive">Удалить</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Диалог для сопроводительного письма */}
+      <Dialog open={openCoverLetterDialog} onOpenChange={setOpenCoverLetterDialog}>
+        <DialogContent className="dark:bg-zinc-800 dark:text-gray-200">
+          <DialogHeader>
+            <DialogTitle className="dark:text-white">Сопроводительное письмо</DialogTitle>
+            <DialogDescription className="dark:text-gray-400">
+              Текст сопроводительного письма.
+            </DialogDescription>
+          </DialogHeader>
+          <Textarea
+            value={generatedCoverLetter}
+            readOnly
+            rows="10"
+            className="dark:bg-zinc-900 dark:text-gray-200 dark:border-zinc-700"
+          />
+          <DialogFooter>
+            <Button onClick={() => downloadCoverLetterPDF(currentAssessment)} variant="secondary">
+              Скачать PDF
+            </Button>
+            <Button onClick={() => handleCopy(generatedCoverLetter)}>
+              {copyButtonText}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+export default HistoryPage;
