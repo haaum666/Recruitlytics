@@ -200,6 +200,23 @@ function HistoryPage({ onEdit }) {
     setOpenCoverLetterDialog(true);
   };
 
+  const downloadCoverLetterPDF = () => {
+    const element = document.createElement('div');
+    element.innerHTML = generatedCoverLetter.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>').replace(/---/g, '<hr>');
+    element.style.padding = '20px';
+    element.style.whiteSpace = 'pre-wrap';
+    
+    const opt = {
+      margin: 1,
+      filename: `сопроводительное-письмо-${currentAssessment.candidate.lastName || ''}-${new Date(currentAssessment.date).toLocaleDateString()}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+    };
+    
+    html2pdf().from(element).set(opt).save();
+  };
+
   return (
     <div className="p-6 max-w-4xl mx-auto space-y-6">
       <h1 className="text-3xl font-bold mb-6">История оценок</h1>
@@ -276,9 +293,6 @@ function HistoryPage({ onEdit }) {
                   </Button>
                   <Button onClick={() => openFeedbackOptions(assessment)}>
                     Обратная связь для кандидата
-                  </Button>
-                  <Button onClick={() => generatePDF(assessment)} variant="secondary">
-                    Скачать PDF
                   </Button>
                   <Button onClick={() => generateCoverLetter(assessment)} variant="outline">
                     Сопроводительное письмо
@@ -405,6 +419,9 @@ function HistoryPage({ onEdit }) {
             rows="10"
           />
           <DialogFooter>
+            <Button onClick={downloadCoverLetterPDF} variant="secondary">
+              Скачать PDF
+            </Button>
             <Button onClick={() => handleCopy(generatedCoverLetter)}>
               {copyButtonText}
             </Button>
