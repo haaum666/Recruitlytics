@@ -32,6 +32,7 @@ function HistoryPage({ onEdit }) {
   const [selectedItems, setSelectedItems] = useState({ strengths: false, weaknesses: false, motivation: false });
   const [copyButtonText, setCopyButtonText] = useState('Копировать');
   const [currentQuestions, setCurrentQuestions] = useState([]);
+  const [generatedCoverLetter, setGeneratedCoverLetter] = useState('');
 
   useEffect(() => {
     const savedAssessments = getFromLocalStorage('assessments', []);
@@ -162,8 +163,32 @@ function HistoryPage({ onEdit }) {
     
     html2pdf().from(element).set(opt).save();
   };
-  
-  const generateCoverLetter = () => {
+
+  const generateCoverLetter = (assessment) => {
+    const { firstName, lastName, role, messenger } = assessment.candidate;
+    const { strengths, weaknesses, motivation } = assessment;
+
+    const letterContent = `
+Добрый день, [ИМЯ_РЕКРУТЕРА],
+
+Настоящим письмом хочу предоставить оценку кандидата ${firstName} ${lastName} на позицию ${role}.
+
+Кандидат проявил себя как:
+Сильные стороны: ${strengths || 'не указаны'}
+
+Зоны внимания: ${weaknesses || 'не указаны'}
+
+Мотивация: ${motivation || 'не указана'}
+
+Мы связались с ним в мессенджере ${messenger || 'не указан'}.
+
+Пожалуйста, ознакомьтесь с полным отчетом по компетенциям в системе.
+
+С уважением,
+HRBP
+    `.trim();
+
+    setGeneratedCoverLetter(letterContent);
     setOpenCoverLetterDialog(true);
   };
 
@@ -363,11 +388,18 @@ function HistoryPage({ onEdit }) {
           <DialogHeader>
             <DialogTitle>Сопроводительное письмо</DialogTitle>
             <DialogDescription>
-              Функция 'Сопроводительное письмо' пока не реализована.
+              Текст письма, готовый для отправки рекрутеру.
             </DialogDescription>
           </DialogHeader>
+          <Textarea
+            value={generatedCoverLetter}
+            readOnly
+            rows="10"
+          />
           <DialogFooter>
-            <Button onClick={() => setOpenCoverLetterDialog(false)}>ОК</Button>
+            <Button onClick={() => handleCopy(generatedCoverLetter)}>
+              {copyButtonText}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
