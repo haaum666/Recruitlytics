@@ -27,15 +27,22 @@ function HistoryPage({ onEdit }) {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [openCoverLetterDialog, setOpenCoverLetterDialog] = useState(false);
   const [generatedEmail, setGeneratedEmail] = useState('');
+  const [generatedCoverLetter, setGeneratedCoverLetter] = useState(''); // Эта строка была добавлена
   const [currentAssessment, setCurrentAssessment] = useState(null);
   const [feedbackType, setFeedbackType] = useState(null);
   const [selectedItems, setSelectedItems] = useState({ strengths: false, weaknesses: false, motivation: false });
   const [copyButtonText, setCopyButtonText] = useState('Копировать');
-  const [questions, setQuestions] = useState([]);
-
+  
   useEffect(() => {
     const savedAssessments = getFromLocalStorage('assessments', []);
     setAssessments(savedAssessments);
+  }, []);
+
+  const getAssessmentQuestions = (assessment) => {
+    if (assessment.questions) {
+      return assessment.questions;
+    }
+
     const savedCustomQuestions = getFromLocalStorage('customQuestions', []);
     const savedModifiedDefaultQuestions = getFromLocalStorage('modifiedDefaultQuestions', []);
 
@@ -44,12 +51,8 @@ function HistoryPage({ onEdit }) {
       return modified || defaultQ;
     });
 
-    const combinedQuestions = [
-      ...mergedQuestions,
-      ...savedCustomQuestions
-    ];
-    setQuestions(combinedQuestions);
-  }, []);
+    return [...mergedQuestions, ...savedCustomQuestions];
+  };
 
   const openFeedbackOptions = (assessment) => {
     setCurrentAssessment(assessment);
@@ -121,7 +124,7 @@ function HistoryPage({ onEdit }) {
   };
 
   const generatePDF = (assessment) => {
-    const questionsToUse = assessment.questions || questions;
+    const questionsToUse = getAssessmentQuestions(assessment);
     const element = document.createElement('div');
     element.className = 'p-6 bg-white';
     element.innerHTML = `
@@ -177,7 +180,7 @@ function HistoryPage({ onEdit }) {
   const generateCoverLetter = (assessment) => {
     setCurrentAssessment(assessment);
     const { candidate, score, strengths, weaknesses, motivation, data } = assessment;
-    const questionsToUse = assessment.questions || questions;
+    const questionsToUse = getAssessmentQuestions(assessment);
 
     const detailedAssessment = questionsToUse.map(question => {
         const assessmentItem = data[question.id] || {};
@@ -210,7 +213,7 @@ function HistoryPage({ onEdit }) {
   
   const downloadCoverLetterPDF = (assessment) => {
     const { candidate, score, strengths, weaknesses, motivation, data } = assessment;
-    const questionsToUse = assessment.questions || questions;
+    const questionsToUse = getAssessmentQuestions(assessment);
 
     const detailedAssessment = questionsToUse.map(question => {
         const assessmentItem = data[question.id] || {};
@@ -283,7 +286,7 @@ function HistoryPage({ onEdit }) {
       {assessments.length > 0 ? (
         <Accordion type="single" collapsible className="w-full space-y-4">
           {assessments.map((assessment) => {
-            const questionsToUse = assessment.questions || questions;
+            const questionsToUse = getAssessmentQuestions(assessment);
             return (
               <AccordionItem key={assessment.id} value={assessment.id}>
                 <AccordionTrigger className="p-4">
