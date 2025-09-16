@@ -14,12 +14,13 @@ function Sidebar({ onPageChange, currentPage }) {
         <h2 className="
           text-2xl 
           font-extrabold 
-          text-black 
+          text-gray-800 
           bg-gray-200 
           p-2 
           border-2 
           border-gray-500 
-          shadow-[2px_2px_0_0_#808080]
+          shadow-[2px_2px_0_0_#808080] 
+          font-mono
         ">
           Recruitlytics
         </h2>
