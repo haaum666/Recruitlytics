@@ -256,7 +256,7 @@ function HistoryPage({ onEdit }) {
     
     const opt = {
       margin: 1,
-      filename: `сопроводительное-письмо-${candidate.lastName || ''}-${new Date(currentAssessment.date).toLocaleDateString()}.pdf`,
+      filename: `сопроводительное-письмо-${candidate.lastName || ''}-${new Date(assessment.date).toLocaleDateString()}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2 },
       jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
@@ -385,7 +385,7 @@ function HistoryPage({ onEdit }) {
             <DialogTitle>Выберите пункты для письма</DialogTitle>
             <DialogDescription>
               Отметьте, какие комментарии вы хотите включить в письмо.
-            </DialogDescription>
+            </Dialog-Description>
           </DialogHeader>
           <div className="space-y-4 p-4">
             {currentAssessment?.strengths && (
@@ -460,7 +460,7 @@ function HistoryPage({ onEdit }) {
             <DialogTitle>Сопроводительное письмо</DialogTitle>
             <DialogDescription>
               Текст письма, готовый для отправки рекрутеру.
-            </DialogDescription>
+            </Dialog-Description>
           </DialogHeader>
           <Textarea
             value={generatedCoverLetter}
