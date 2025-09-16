@@ -4,7 +4,6 @@ import { Card, CardContent } from '../components/ui/card';
 import { Label } from '../components/ui/label';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
-import { Textarea } from '../components/ui/textarea';
 import { questions as defaultQuestions } from '../config/questions.js';
 
 function SettingsPage() {
@@ -12,7 +11,6 @@ function SettingsPage() {
   const [newQuestionText, setNewQuestionText] = useState('');
   const [newQuestionWeight, setNewQuestionWeight] = useState(1);
   const [editingQuestionId, setEditingQuestionId] = useState(null);
-  const [emailTemplates, setEmailTemplates] = useState({ positive: '', negative: '' });
 
   useEffect(() => {
     const savedCustomQuestions = getFromLocalStorage('customQuestions', []);
@@ -28,8 +26,6 @@ function SettingsPage() {
       ...savedCustomQuestions
     ];
     setAllQuestions(combinedQuestions);
-    const savedTemplates = getFromLocalStorage('emailTemplates', { positive: '', negative: '' });
-    setEmailTemplates(savedTemplates);
   }, []);
 
   const handleEditClick = (question) => {
@@ -76,12 +72,6 @@ function SettingsPage() {
     setAllQuestions(updatedQuestions);
     const customQuestionsToSave = updatedQuestions.filter(q => !defaultQuestions.some(defaultQ => defaultQ.id === q.id));
     saveToLocalStorage('customQuestions', customQuestionsToSave);
-  };
-
-  const handleTemplateChange = (type, value) => {
-    const updatedTemplates = { ...emailTemplates, [type]: value };
-    setEmailTemplates(updatedTemplates);
-    saveToLocalStorage('emailTemplates', updatedTemplates);
   };
 
   return (
@@ -133,35 +123,6 @@ function SettingsPage() {
             <Button onClick={handleAddOrUpdateQuestion} className="mt-auto">
               {editingQuestionId ? 'Сохранить' : 'Добавить'}
             </Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Настройка шаблонов писем */}
-      <Card>
-        <CardContent className="pt-6">
-          <h2 className="text-xl font-semibold mb-4">Шаблоны писем</h2>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="positive-template">Положительный шаблон</Label>
-              <Textarea
-                id="positive-template"
-                value={emailTemplates.positive}
-                onChange={(e) => handleTemplateChange('positive', e.target.value)}
-                placeholder="[ИМЯ_КАНДИДАТА], мы готовы сделать вам предложение! [ИТОГОВЫЙ_БАЛЛ]"
-                rows="5"
-              />
-            </div>
-            <div>
-              <Label htmlFor="negative-template">Отрицательный шаблон</Label>
-              <Textarea
-                id="negative-template"
-                value={emailTemplates.negative}
-                onChange={(e) => handleTemplateChange('negative', e.target.value)}
-                placeholder="[ИМЯ_КАНДИДАТА], к сожалению, мы не готовы сделать предложение. [ИТОГОВЫЙ_БАЛЛ]"
-                rows="5"
-              />
-            </div>
           </div>
         </CardContent>
       </Card>
