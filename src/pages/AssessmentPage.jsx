@@ -8,7 +8,7 @@ import { Textarea } from '../components/ui/textarea';
 import { Button } from '../components/ui/button';
 import { questions as defaultQuestions } from '../config/questions.js';
 
-function AssessmentPage({ assessmentToEdit, setAssessmentToEdit, onPageChange }) {
+function AssessmentPage({ assessmentToEdit, setAssessmentToEdit, onPageChange, saveButtonRef }) {
   const [questions, setQuestions] = useState([]);
   const [assessmentData, setAssessmentData] = useState({});
   const [candidateData, setCandidateData] = useState({
@@ -27,8 +27,6 @@ function AssessmentPage({ assessmentToEdit, setAssessmentToEdit, onPageChange })
   const [motivation, setMotivation] = useState('');
 
   const [openAccordion, setOpenAccordion] = useState('');
-  const [flyOut, setFlyOut] = useState(false); // Новое состояние для анимации
-
   const scoreInputRefs = useRef({});
   const commentInputRefs = useRef({});
 
@@ -133,37 +131,32 @@ function AssessmentPage({ assessmentToEdit, setAssessmentToEdit, onPageChange })
   };
 
   const saveAssessment = () => {
-    setFlyOut(true); // Запускаем анимацию
-
-    setTimeout(() => {
-      const totalScore = calculateTotalScore();
-      const newAssessment = {
-        id: assessmentToEdit ? assessmentToEdit.id : Date.now(),
-        date: new Date().toISOString(),
-        score: totalScore,
-        data: assessmentData,
-        candidate: candidateData,
-        strengths: strengths,
-        weaknesses: weaknesses,
-        motivation: motivation,
-      };
-      
-      const savedAssessments = getFromLocalStorage('assessments', []);
-      if (assessmentToEdit) {
-        const updatedAssessments = savedAssessments.map(item =>
-          item.id === assessmentToEdit.id ? newAssessment : item
-        );
-        saveToLocalStorage('assessments', updatedAssessments);
-        alert('Оценка успешно обновлена!');
-      } else {
-        saveToLocalStorage('assessments', [...savedAssessments, newAssessment]);
-        alert('Оценка успешно сохранена!');
-      }
-      
-      setFlyOut(false);
-      setAssessmentToEdit(null);
-      onPageChange('history'); // Переходим на страницу истории
-    }, 1000); // Задержка для анимации
+    const totalScore = calculateTotalScore();
+    const newAssessment = {
+      id: assessmentToEdit ? assessmentToEdit.id : Date.now(),
+      date: new Date().toISOString(),
+      score: totalScore,
+      data: assessmentData,
+      candidate: candidateData,
+      strengths: strengths,
+      weaknesses: weaknesses,
+      motivation: motivation,
+    };
+    
+    const savedAssessments = getFromLocalStorage('assessments', []);
+    if (assessmentToEdit) {
+      const updatedAssessments = savedAssessments.map(item =>
+        item.id === assessmentToEdit.id ? newAssessment : item
+      );
+      saveToLocalStorage('assessments', updatedAssessments);
+      alert('Оценка успешно обновлена!');
+    } else {
+      saveToLocalStorage('assessments', [...savedAssessments, newAssessment]);
+      alert('Оценка успешно сохранена!');
+    }
+    
+    setAssessmentToEdit(null);
+    onPageChange('history');
   };
 
   const handleAccordionOpen = (value) => {
@@ -207,18 +200,7 @@ function AssessmentPage({ assessmentToEdit, setAssessmentToEdit, onPageChange })
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-6 relative overflow-hidden">
-      {flyOut && (
-        <div 
-          className="absolute z-50 bg-gray-300 w-10 h-10 border-2 border-gray-400"
-          style={{
-            bottom: '24px',
-            left: 'calc(50% - 20px)',
-            transition: 'transform 1s cubic-bezier(0.68, -0.55, 0.27, 1.55)',
-            transform: `translate(${window.innerWidth * -0.3}px, ${window.innerHeight * -0.7}px) scale(0.2)`
-          }}
-        />
-      )}
+    <div className="p-6 max-w-4xl mx-auto space-y-6">
       <h1 className="text-3xl font-bold">{assessmentToEdit ? 'Редактирование оценки' : 'Оценка компетенций специалиста'}</h1>
 
       <Card>
@@ -385,7 +367,7 @@ function AssessmentPage({ assessmentToEdit, setAssessmentToEdit, onPageChange })
       </Card>
 
       <div className="flex justify-center items-center mt-6">
-        <Button onClick={saveAssessment} className="w-1/2 md:w-auto bg-gray-200 text-gray-800 hover:bg-gray-300">
+        <Button onClick={saveAssessment} ref={saveButtonRef} className="w-1/2 md:w-auto bg-gray-200 text-gray-800 hover:bg-gray-300">
           {assessmentToEdit ? 'Обновить и завершить' : 'Сохранить и завершить'}
         </Button>
       </div>
