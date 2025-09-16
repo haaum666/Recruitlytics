@@ -55,7 +55,7 @@ const ThemeToggle = () => {
   };
 
   return (
-    <Button variant="ghost" size="icon" onClick={toggleTheme} className="ml-auto">
+    <Button variant="ghost" size="icon" onClick={toggleTheme}>
       {theme === 'light' ? <SunIcon /> : <MoonIcon />}
     </Button>
   );
