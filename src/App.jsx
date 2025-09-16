@@ -23,13 +23,13 @@ function App() {
   const renderPage = () => {
     switch (currentPage) {
       case 'assessment':
-        return <AssessmentPage assessmentToEdit={assessmentToEdit} setAssessmentToEdit={setAssessmentToEdit} />;
+        return <AssessmentPage assessmentToEdit={assessmentToEdit} setAssessmentToEdit={setAssessmentToEdit} onPageChange={handlePageChange} />;
       case 'history':
         return <HistoryPage onEdit={handleEditAssessment} />;
       case 'settings':
         return <SettingsPage />;
       default:
-        return <AssessmentPage assessmentToEdit={assessmentToEdit} setAssessmentToEdit={setAssessmentToEdit} />;
+        return <AssessmentPage assessmentToEdit={assessmentToEdit} setAssessmentToEdit={setAssessmentToEdit} onPageChange={handlePageChange} />;
     }
   };
 
