@@ -181,15 +181,11 @@ function HistoryPage({ onEdit }) {
 **Ожидания по ЗП**: ${candidate.salary || 'не указаны'}
 **Телефон**: ${candidate.phone || 'не указан'}
 **Мессенджер**: ${candidate.messenger || 'не указан'}
-
 ---
-
 **Общий балл**: ${score} / 10 (максимальная оценка)
 *Баллы рассчитываются как взвешенная оценка по ключевым компетенциям кандидата.*
 **Детали оценки**: ${detailedAssessment}
-
 ---
-
 **Профиль кандидата**:
 **Сильные стороны**: ${strengths || 'Не заполнено'}
 **Потенциальные зоны внимания**: ${weaknesses || 'Не заполнено'}
@@ -201,14 +197,56 @@ function HistoryPage({ onEdit }) {
   };
 
   const downloadCoverLetterPDF = () => {
+    const { candidate, score, strengths, weaknesses, motivation, data } = currentAssessment;
+    
+    const detailedAssessment = currentQuestions.map(question => {
+        const assessmentItem = data[question.id] || {};
+        const scoreValue = assessmentItem.score || 'Не указан';
+        const commentValue = assessmentItem.comment || 'Нет комментария';
+        return `<li>**${question.text}** — *${scoreValue}/10* (${commentValue})</li>`;
+    }).join('');
+
     const element = document.createElement('div');
-    element.innerHTML = generatedCoverLetter.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>').replace(/---/g, '<hr>');
-    element.style.padding = '20px';
-    element.style.whiteSpace = 'pre-wrap';
+    element.innerHTML = `
+      <style>
+        body { font-family: 'Arial', sans-serif; line-height: 1.6; color: #333; }
+        h1, h2 { color: #2c3e50; margin-bottom: 0.5em; }
+        h1 { font-size: 24px; }
+        h2 { font-size: 18px; }
+        p, ul, li { margin: 0 0 10px 0; }
+        ul { padding-left: 20px; }
+        li { margin-bottom: 5px; }
+        .section-header { font-weight: bold; margin-top: 20px; }
+      </style>
+      <div style="padding: 20px;">
+        <h2 style="font-weight: bold; margin-bottom: 5px;">Кандидат:</h2>
+        <p>${candidate.firstName || ''} ${candidate.lastName || ''} на позицию ${candidate.role || 'не указана'}</p>
+        <p><strong>Возраст:</strong> ${candidate.age || 'не указан'}</p>
+        <p><strong>Локация:</strong> ${candidate.location || 'не указана'}</p>
+        <p><strong>Ожидания по ЗП:</strong> ${candidate.salary || 'не указаны'}</p>
+        <p><strong>Телефон:</strong> ${candidate.phone || 'не указан'}</p>
+        <p><strong>Мессенджер:</strong> ${candidate.messenger || 'не указан'}</p>
+        
+        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #ccc;">
+
+        <h2 style="font-weight: bold; margin-bottom: 5px;">Общий балл:</h2>
+        <p>${score} / 10 (максимальная оценка)</p>
+        <p><em>Баллы рассчитываются как взвешенная оценка по ключевым компетенциям кандидата.</em></p>
+        <h2 style="font-weight: bold; margin-top: 20px; margin-bottom: 5px;">Детали оценки:</h2>
+        <p>${detailedAssessment.replace(/<[^>]*>/g, '').replace(/&nbsp;/g, ' ')}</p>
+
+        <hr style="margin: 20px 0; border: 0; border-top: 1px solid #ccc;">
+
+        <h2 style="font-weight: bold; margin-bottom: 5px;">Профиль кандидата:</h2>
+        <p><strong>Сильные стороны:</strong> ${strengths || 'Не заполнено'}</p>
+        <p><strong>Потенциальные зоны внимания:</strong> ${weaknesses || 'Не заполнено'}</p>
+        <p><strong>Мотивация:</strong> ${motivation || 'Не заполнено'}</p>
+      </div>
+    `;
     
     const opt = {
       margin: 1,
-      filename: `сопроводительное-письмо-${currentAssessment.candidate.lastName || ''}-${new Date(currentAssessment.date).toLocaleDateString()}.pdf`,
+      filename: `сопроводительное-письмо-${candidate.lastName || ''}-${new Date(currentAssessment.date).toLocaleDateString()}.pdf`,
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { scale: 2 },
       jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
