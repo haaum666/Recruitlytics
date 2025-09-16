@@ -1,128 +1,120 @@
 import React, { useState, useEffect } from 'react';
 import { getFromLocalStorage, saveToLocalStorage } from '../services/localStorageService.js';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
 import { Card, CardContent } from '../components/ui/card';
 import { Label } from '../components/ui/label';
-import { Input } from '../components/ui/input';
-import { Button } from '../components/ui/button';
-import { questions as defaultQuestions } from '../config/questions.js';
+import { toast } from 'react-hot-toast';
 
 function SettingsPage() {
-  const [allQuestions, setAllQuestions] = useState([]);
+  const [customQuestions, setCustomQuestions] = useState([]);
   const [newQuestionText, setNewQuestionText] = useState('');
   const [newQuestionWeight, setNewQuestionWeight] = useState(1);
-  const [editingQuestionId, setEditingQuestionId] = useState(null);
+  const [defaultQuestions, setDefaultQuestions] = useState([]);
+  const [modifiedDefaultQuestions, setModifiedDefaultQuestions] = useState([]);
 
   useEffect(() => {
     const savedCustomQuestions = getFromLocalStorage('customQuestions', []);
+    setCustomQuestions(savedCustomQuestions);
     const savedModifiedDefaultQuestions = getFromLocalStorage('modifiedDefaultQuestions', []);
-
-    const mergedDefaultQuestions = defaultQuestions.map(defaultQ => {
-      const modified = savedModifiedDefaultQuestions.find(modQ => modQ.id === defaultQ.id);
-      return modified || defaultQ;
-    });
-
-    const combinedQuestions = [
-      ...mergedDefaultQuestions,
-      ...savedCustomQuestions
-    ];
-    setAllQuestions(combinedQuestions);
+    setModifiedDefaultQuestions(savedModifiedDefaultQuestions);
   }, []);
 
-  const handleEditClick = (question) => {
-    setNewQuestionText(question.text);
-    setNewQuestionWeight(question.weight);
-    setEditingQuestionId(question.id);
-  };
-
-  const handleAddOrUpdateQuestion = () => {
-    if (newQuestionText.trim() !== '') {
-      let updatedQuestions;
-      if (editingQuestionId) {
-        updatedQuestions = allQuestions.map(q =>
-          q.id === editingQuestionId
-            ? { ...q, text: newQuestionText, weight: Number(newQuestionWeight) }
-            : q
-        );
-      } else {
-        const newQuestion = {
-          id: Date.now(),
-          text: newQuestionText,
-          weight: Number(newQuestionWeight),
-        };
-        updatedQuestions = [...allQuestions, newQuestion];
-      }
-      setAllQuestions(updatedQuestions);
-
-      const modifiedDefaultQuestions = updatedQuestions.filter(q =>
-        defaultQuestions.some(defaultQ => defaultQ.id === q.id)
-      );
-      saveToLocalStorage('modifiedDefaultQuestions', modifiedDefaultQuestions);
-
-      const customQuestionsToSave = updatedQuestions.filter(q => !defaultQuestions.some(defaultQ => defaultQ.id === q.id));
-      saveToLocalStorage('customQuestions', customQuestionsToSave);
-      
-      setEditingQuestionId(null);
-      setNewQuestionText('');
-      setNewQuestionWeight(1);
+  const addCustomQuestion = () => {
+    if (!newQuestionText.trim()) {
+      toast.error('Текст вопроса не может быть пустым.');
+      return;
     }
+    const newQuestion = {
+      id: `custom-${Date.now()}`,
+      text: newQuestionText,
+      weight: parseInt(newQuestionWeight, 10),
+    };
+    const updatedQuestions = [...customQuestions, newQuestion];
+    setCustomQuestions(updatedQuestions);
+    saveToLocalStorage('customQuestions', updatedQuestions);
+    setNewQuestionText('');
+    setNewQuestionWeight(1);
+    toast.success('Вопрос успешно добавлен!');
   };
 
-  const handleDeleteQuestion = (id) => {
-    const updatedQuestions = allQuestions.filter(q => q.id !== id);
-    setAllQuestions(updatedQuestions);
-    const customQuestionsToSave = updatedQuestions.filter(q => !defaultQuestions.some(defaultQ => defaultQ.id === q.id));
-    saveToLocalStorage('customQuestions', customQuestionsToSave);
+  const deleteCustomQuestion = (id) => {
+    const updatedQuestions = customQuestions.filter(q => q.id !== id);
+    setCustomQuestions(updatedQuestions);
+    saveToLocalStorage('customQuestions', updatedQuestions);
+    toast.success('Вопрос удален.');
+  };
+
+  const updateDefaultQuestionWeight = (id, newWeight) => {
+    const newWeightInt = parseInt(newWeight, 10);
+    const updatedQuestions = modifiedDefaultQuestions.map(q =>
+      q.id === id ? { ...q, weight: newWeightInt } : q
+    );
+    setModifiedDefaultQuestions(updatedQuestions);
+    saveToLocalStorage('modifiedDefaultQuestions', updatedQuestions);
+    toast.success('Вес вопроса обновлен.');
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-6">
-      <h1 className="text-3xl font-bold mb-6">Настройки</h1>
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold dark:text-white">Настройки</h1>
 
-      {/* Управление вопросами */}
-      <Card className="mb-6">
-        <CardContent className="pt-6">
-          <h2 className="text-xl font-semibold mb-4">Управление вопросами</h2>
+      <Card>
+        <CardContent className="space-y-4">
+          <h2 className="text-xl font-semibold dark:text-white">Управление вопросами</h2>
           <div className="space-y-4">
-            {allQuestions.map(q => (
-              <div key={q.id} className="flex items-center justify-between p-3 border rounded-md">
+            {modifiedDefaultQuestions.length > 0 && modifiedDefaultQuestions.map(q => (
+              <div key={q.id} className="flex items-center justify-between p-2 border rounded-md dark:border-zinc-700 dark:text-gray-200">
                 <span>{q.text} ({q.weight} баллов)</span>
-                <div className="space-x-2">
-                  <Button onClick={() => handleEditClick(q)} variant="outline" size="sm">
-                    Редактировать
-                  </Button>
-                  {defaultQuestions.every(defaultQ => defaultQ.id !== q.id) && (
-                    <Button onClick={() => handleDeleteQuestion(q.id)} variant="destructive" size="sm">
-                      Удалить
-                    </Button>
-                  )}
+                <div className="flex items-center space-x-2">
+                  <Input 
+                    type="number" 
+                    value={q.weight} 
+                    onChange={(e) => updateDefaultQuestionWeight(q.id, e.target.value)} 
+                    min="1" max="10" 
+                    className="w-20 dark:bg-zinc-900 dark:border-zinc-700 dark:text-gray-200"
+                  />
                 </div>
               </div>
             ))}
+            {customQuestions.map(q => (
+              <div key={q.id} className="flex items-center justify-between p-2 border rounded-md dark:border-zinc-700 dark:text-gray-200">
+                <span>{q.text} ({q.weight} баллов)</span>
+                <Button variant="destructive" onClick={() => deleteCustomQuestion(q.id)}>
+                  Удалить
+                </Button>
+              </div>
+            ))}
           </div>
-          <div className="mt-6 flex flex-col sm:flex-row gap-4">
-            <div className="flex-grow">
-              <Label htmlFor="new-question">Новый вопрос</Label>
-              <Input
-                id="new-question"
-                value={newQuestionText}
-                onChange={(e) => setNewQuestionText(e.target.value)}
-                placeholder="Например: 'Опыт работы с микросервисами'"
-              />
+
+          <div className="space-y-2">
+            <h3 className="font-semibold dark:text-gray-300">Новый вопрос</h3>
+            <div className="flex space-x-2 items-end">
+              <div className="flex-1">
+                <Label htmlFor="newQuestionText" className="sr-only">Текст вопроса</Label>
+                <Input
+                  id="newQuestionText"
+                  placeholder="Например: 'Опыт работы с микросервисами'"
+                  value={newQuestionText}
+                  onChange={(e) => setNewQuestionText(e.target.value)}
+                  className="dark:bg-zinc-900 dark:border-zinc-700 dark:text-gray-200"
+                />
+              </div>
+              <div>
+                <Label htmlFor="newQuestionWeight" className="sr-only">Вес (1-10)</Label>
+                <Input
+                  id="newQuestionWeight"
+                  type="number"
+                  placeholder="Вес (1-10)"
+                  value={newQuestionWeight}
+                  onChange={(e) => setNewQuestionWeight(e.target.value)}
+                  min="1"
+                  max="10"
+                  className="w-20 dark:bg-zinc-900 dark:border-zinc-700 dark:text-gray-200"
+                />
+              </div>
+              <Button onClick={addCustomQuestion}>Добавить</Button>
             </div>
-            <div className="w-24">
-              <Label htmlFor="new-question-weight">Вес (1-10)</Label>
-              <Input
-                id="new-question-weight"
-                type="number"
-                min="1"
-                max="10"
-                value={newQuestionWeight}
-                onChange={(e) => setNewQuestionWeight(e.target.value)}
-              />
-            </div>
-            <Button onClick={handleAddOrUpdateQuestion} className="mt-auto">
-              {editingQuestionId ? 'Сохранить' : 'Добавить'}
-            </Button>
           </div>
         </CardContent>
       </Card>
