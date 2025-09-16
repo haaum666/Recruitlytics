@@ -165,27 +165,35 @@ function HistoryPage({ onEdit }) {
   };
 
   const generateCoverLetter = (assessment) => {
-    const { firstName, lastName, role, messenger } = assessment.candidate;
-    const { strengths, weaknesses, motivation } = assessment;
+    const { candidate, score, strengths, weaknesses, motivation, data } = assessment;
 
+    const detailedAssessment = currentQuestions.map(question => {
+        const assessmentItem = data[question.id] || {};
+        const scoreValue = assessmentItem.score || 'Не указан';
+        const commentValue = assessmentItem.comment || 'Нет комментария';
+        return `${question.text} – ${scoreValue}/10 (${commentValue})`;
+    }).join(', ');
+    
     const letterContent = `
-Добрый день, [ИМЯ_РЕКРУТЕРА],
+**Кандидат**: ${candidate.firstName || ''} ${candidate.lastName || ''} на позицию ${candidate.role || 'не указана'}
+**Возраст**: ${candidate.age || 'не указан'}
+**Локация**: ${candidate.location || 'не указана'}
+**Ожидания по ЗП**: ${candidate.salary || 'не указаны'}
+**Телефон**: ${candidate.phone || 'не указан'}
+**Мессенджер**: ${candidate.messenger || 'не указан'}
 
-Настоящим письмом хочу предоставить оценку кандидата ${firstName} ${lastName} на позицию ${role}.
+---
 
-Кандидат проявил себя как:
-Сильные стороны: ${strengths || 'не указаны'}
+**Общий балл**: ${score} / 10 (максимальная оценка)
+*Баллы рассчитываются как взвешенная оценка по ключевым компетенциям кандидата.*
+**Детали оценки**: ${detailedAssessment}
 
-Зоны внимания: ${weaknesses || 'не указаны'}
+---
 
-Мотивация: ${motivation || 'не указана'}
-
-Мы связались с ним в мессенджере ${messenger || 'не указан'}.
-
-Пожалуйста, ознакомьтесь с полным отчетом по компетенциям в системе.
-
-С уважением,
-HRBP
+**Профиль кандидата**:
+**Сильные стороны**: ${strengths || 'Не заполнено'}
+**Потенциальные зоны внимания**: ${weaknesses || 'Не заполнено'}
+**Мотивация**: ${motivation || 'Не заполнено'}
     `.trim();
 
     setGeneratedCoverLetter(letterContent);
