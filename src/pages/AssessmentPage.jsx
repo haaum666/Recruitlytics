@@ -7,6 +7,7 @@ import { Input } from '../components/ui/input';
 import { Textarea } from '../components/ui/textarea';
 import { Button } from '../components/ui/button';
 import { questions as defaultQuestions } from '../config/questions.js';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../components/ui/dialog';
 
 function AssessmentPage({ assessmentToEdit, setAssessmentToEdit, onPageChange, saveButtonRef }) {
   const [questions, setQuestions] = useState([]);
@@ -29,6 +30,7 @@ function AssessmentPage({ assessmentToEdit, setAssessmentToEdit, onPageChange, s
   const [openAccordion, setOpenAccordion] = useState('');
   const scoreInputRefs = useRef({});
   const commentInputRefs = useRef({});
+  const [isSaveSuccess, setIsSaveSuccess] = useState(false);
 
   const resetForm = () => {
     const savedCustomQuestions = getFromLocalStorage('customQuestions', []);
@@ -149,14 +151,13 @@ function AssessmentPage({ assessmentToEdit, setAssessmentToEdit, onPageChange, s
         item.id === assessmentToEdit.id ? newAssessment : item
       );
       saveToLocalStorage('assessments', updatedAssessments);
-      alert('Оценка успешно обновлена!');
     } else {
       saveToLocalStorage('assessments', [...savedAssessments, newAssessment]);
-      alert('Оценка успешно сохранена!');
     }
     
     setAssessmentToEdit(null);
     onPageChange('history');
+    setIsSaveSuccess(true);
   };
 
   const handleAccordionOpen = (value) => {
@@ -371,6 +372,20 @@ function AssessmentPage({ assessmentToEdit, setAssessmentToEdit, onPageChange, s
           {assessmentToEdit ? 'Обновить и завершить' : 'Сохранить и завершить'}
         </Button>
       </div>
+
+      <Dialog open={isSaveSuccess} onOpenChange={setIsSaveSuccess}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Сохранение завершено</DialogTitle>
+            <DialogDescription>
+              {assessmentToEdit ? 'Оценка успешно обновлена!' : 'Оценка успешно сохранена!'}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button onClick={() => setIsSaveSuccess(false)}>ОК</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
