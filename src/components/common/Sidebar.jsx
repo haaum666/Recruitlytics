@@ -1,10 +1,10 @@
 import React from 'react';
 import { Button } from '../ui/button';
 
-function Sidebar({ onPageChange, currentPage }) {
+function Sidebar({ onPageChange, currentPage, historyButtonRef }) {
   const navItems = [
     { name: 'Новая оценка', page: 'assessment' },
-    { name: 'История', page: 'history' },
+    { name: 'История', page: 'history', ref: historyButtonRef },
     { name: 'Настройки', page: 'settings' },
   ];
 
@@ -35,6 +35,7 @@ function Sidebar({ onPageChange, currentPage }) {
         {navItems.map((item) => (
           <Button
             key={item.page}
+            ref={item.ref}
             variant={currentPage === item.page ? 'secondary' : 'ghost'}
             className="w-full justify-center transition-colors duration-200 ease-in-out hover:bg-slate-200"
             onClick={() => onPageChange(item.page)}
