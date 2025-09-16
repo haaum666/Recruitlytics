@@ -1,5 +1,6 @@
 import React from 'react';
 import { Button } from '../ui/button';
+import { cn } from '../../utils/cn.js';
 
 function Sidebar({ onPageChange, currentPage, historyButtonRef }) {
   const navItems = [
@@ -11,23 +12,10 @@ function Sidebar({ onPageChange, currentPage, historyButtonRef }) {
   return (
     <aside className="w-64 bg-white border-r flex flex-col items-center">
       <div className="py-6 mb-4">
-        <h2 className="
-          text-2xl 
-          font-extrabold 
-          text-gray-800 
-          bg-gray-200 
-          p-2 
-          border-2 
-          border-gray-500 
-          shadow-[4px_4px_0_0_#4a5568] 
-          font-mono 
-          transition-all 
-          duration-100 
-          ease-in-out 
-          active:translate-x-1 
-          active:translate-y-1 
-          active:shadow-none
-        ">
+        <h2 className={cn(
+          "text-2xl text-white bg-black p-2 border-2 border-gray-500 shadow-[6px_6px_0_0_#4a5568]",
+          "drop-shadow-[2px_2px_0_#4a5568] uppercase tracking-wider"
+        )}>
           Recruitlytics
         </h2>
       </div>
