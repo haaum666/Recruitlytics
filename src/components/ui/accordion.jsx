@@ -9,7 +9,7 @@ const Accordion = AccordionPrimitive.Root
 const AccordionItem = React.forwardRef(({ className, ...props }, ref) => (
   <AccordionPrimitive.Item
     ref={ref}
-    className={cn("border-b", className)}
+    className={cn("mt-4 border-2 border-b-8 border-r-8 border-gray-400 bg-white shadow-[4px_4px_0_0_#4a5568]", className)}
     {...props}
   />
 ))
@@ -20,13 +20,15 @@ const AccordionTrigger = React.forwardRef(({ className, children, ...props }, re
     <AccordionPrimitive.Trigger
       ref={ref}
       className={cn(
-        "flex flex-1 items-center justify-between py-4 text-sm font-medium transition-all hover:underline [&[data-state=open]>svg]:rotate-180",
+        "flex flex-1 items-center justify-between p-4 text-sm font-medium transition-all [&[data-state=open]>svg]:rotate-180",
+        "border-b-2 border-gray-400 active:translate-x-1 active:translate-y-1 active:shadow-none", // Добавлено для эффекта нажатия
+        "hover:bg-gray-200", // Добавлено для hover-эффекта
         className
       )}
       {...props}
     >
       {children}
-      <ChevronDownIcon className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200" />
+      <ChevronDownIcon className="h-4 w-4 shrink-0 text-gray-800 transition-transform duration-200" />
     </AccordionPrimitive.Trigger>
   </AccordionPrimitive.Header>
 ))
@@ -41,7 +43,7 @@ const AccordionContent = React.forwardRef(({ className, children, ...props }, re
     )}
     {...props}
   >
-    <div className="pb-4 pt-0">{children}</div>
+    <div className="p-4 pt-0">{children}</div>
   </AccordionPrimitive.Content>
 ))
 AccordionContent.displayName = AccordionPrimitive.Content.displayName
