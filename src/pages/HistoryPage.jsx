@@ -157,9 +157,14 @@ function HistoryPage({ onEdit }) {
     
     html2pdf().from(element).set(opt).save();
   };
+  
+  // Добавление заглушки для функции generateCoverLetter
+  const generateCoverLetter = () => {
+    alert("Функция 'Сопроводительное письмо' пока не реализована.");
+  };
 
   return (
-    <div className="p-6">
+    <div className="p-6 max-w-4xl mx-auto space-y-6">
       <h1 className="text-3xl font-bold mb-6">История оценок</h1>
       {assessments.length > 0 ? (
         <Accordion type="single" collapsible className="w-full space-y-4">
@@ -277,62 +282,4 @@ function HistoryPage({ onEdit }) {
       <Dialog open={openSelectionDialog} onOpenChange={setOpenSelectionDialog}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Выберите пункты для письма</DialogTitle>
-            <DialogDescription>
-              Отметьте, какие комментарии вы хотите включить в письмо.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 p-4">
-            {currentAssessment?.strengths && (
-              <div className="flex items-center space-x-2">
-                <Checkbox id="strengths" name="strengths" checked={selectedItems.strengths} onCheckedChange={() => handleSelectionChange('strengths')} />
-                <Label htmlFor="strengths">Сильные стороны</Label>
-              </div>
-            )}
-            {currentAssessment?.weaknesses && (
-              <div className="flex items-center space-x-2">
-                <Checkbox id="weaknesses" name="weaknesses" checked={selectedItems.weaknesses} onCheckedChange={() => handleSelectionChange('weaknesses')} />
-                <Label htmlFor="weaknesses">Потенциальные зоны внимания</Label>
-              </div>
-            )}
-            {currentAssessment?.motivation && (
-              <div className="flex items-center space-x-2">
-                <Checkbox id="motivation" name="motivation" checked={selectedItems.motivation} onCheckedChange={() => handleSelectionChange('motivation')} />
-                <Label htmlFor="motivation">Комментарий по мотивации</Label>
-              </div>
-            )}
-          </div>
-          <DialogFooter>
-            <Button onClick={handleGenerateEmail} disabled={Object.values(selectedItems).every(item => !item)}>
-              Сформировать письмо
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      
-      {/* Диалог сгенерированного письма */}
-      <Dialog open={openEmailDialog} onOpenChange={setOpenEmailDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Сгенерированное письмо</DialogTitle>
-            <DialogDescription>
-              Текст письма, готовый для отправки.
-            </DialogDescription>
-          </DialogHeader>
-          <Textarea
-            value={generatedEmail}
-            readOnly
-            rows="10"
-          />
-          <DialogFooter>
-            <Button onClick={() => handleCopy(generatedEmail)}>
-              {copyButtonText}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
-
-export default HistoryPage;
+            <DialogTitle>Выберите пункты для письма</Dialog
