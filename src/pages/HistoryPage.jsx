@@ -385,7 +385,7 @@ function HistoryPage({ onEdit }) {
             <DialogTitle>Выберите пункты для письма</DialogTitle>
             <DialogDescription>
               Отметьте, какие комментарии вы хотите включить в письмо.
-            </Dialog-Description>
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 p-4">
             {currentAssessment?.strengths && (
@@ -460,7 +460,7 @@ function HistoryPage({ onEdit }) {
             <DialogTitle>Сопроводительное письмо</DialogTitle>
             <DialogDescription>
               Текст письма, готовый для отправки рекрутеру.
-            </Dialog-Description>
+            </DialogDescription>
           </DialogHeader>
           <Textarea
             value={generatedCoverLetter}
